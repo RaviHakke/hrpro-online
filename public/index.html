@@ -1,0 +1,1444 @@
+<!doctype html>
+<html class="light">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>HRPro Suite Ultimate</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    
+    <style>
+        #splash { transition: .35s; }
+        .hide { opacity: 0; visibility: hidden; }
+        .glass {
+            background: linear-gradient(135deg, rgba(255, 255, 255, .92), rgba(255, 255, 255, .72));
+            backdrop-filter: blur(10px);
+        }
+        .dark .glass {
+            background: linear-gradient(135deg, rgba(30, 41, 59, .94), rgba(15, 23, 42, .82));
+        }
+        .card {
+            border: 1px solid rgba(148, 163, 184, .25);
+            box-shadow: 0 12px 30px rgba(15, 23, 42, .08);
+        }
+        .btn {
+            padding: .52rem .85rem;
+            border-radius: .9rem;
+            font-size: .75rem;
+            font-weight: 800;
+            display: inline-flex;
+            gap: .35rem;
+            align-items: center;
+        }
+        .btn-i { background: #4f46e5; color: white; }
+        .btn-e { background: #059669; color: white; }
+        .btn-s { background: #f1f5f9; color: #334155; }
+        .dark .btn-s { background: #334155; color: #dbeafe; }
+        .btn-r { background: #fee2e2; color: #dc2626; }
+        .scroll::-webkit-scrollbar { height: 7px; width: 7px; }
+        .scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
+        .th { cursor: pointer; white-space: nowrap; }
+        .th:hover { color: #4f46e5; }
+        .field-label { white-space: pre-line; }
+        .chip { font-size: .65rem; font-weight: 800; border-radius: 999px; padding: .2rem .55rem; }
+        .stack-card {
+            border: 1px solid rgba(148, 163, 184, .35);
+            border-radius: 1rem;
+            padding: 1rem;
+            background: #fff;
+        }
+        .dark .stack-card { background: #1e293b; }
+        .toast { animation: b .25s; }
+        @keyframes b {
+            from { transform: translate(-50%, 100%); opacity: 0; }
+            to { transform: translate(-50%, 0); opacity: 1; }
+        }
+
+        .modal-shell { border: 1px solid rgba(99,102,241,.28); box-shadow: 0 28px 80px rgba(15,23,42,.32); overflow: hidden; }
+        .emp-hero { background: radial-gradient(circle at top left, rgba(255,255,255,.32), transparent 28%), linear-gradient(135deg, #4f46e5, #7c3aed 55%, #0f172a); color: #fff; }
+        .emp-tab { border: 1px solid rgba(148,163,184,.25); transition: .18s ease; }
+        .emp-tab:hover { transform: translateY(-1px); }
+        .emp-section-note { background: linear-gradient(135deg, rgba(99,102,241,.12), rgba(16,185,129,.10)); border: 1px solid rgba(99,102,241,.18); }
+        .entry-field { border: 1px solid rgba(148,163,184,.36); background: rgba(255,255,255,.94); box-shadow: 0 8px 20px rgba(15,23,42,.04); transition: .16s ease; }
+        .entry-field:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 4px rgba(99,102,241,.14), 0 10px 24px rgba(15,23,42,.08); }
+        .dark .entry-field { background: rgba(30,41,59,.92); border-color: rgba(100,116,139,.62); }
+        .field-card { border: 1px solid rgba(148,163,184,.20); border-radius: 1.15rem; padding: .78rem; background: rgba(255,255,255,.62); }
+        .dark .field-card { background: rgba(15,23,42,.34); }
+        .smart-check { border: 1px solid rgba(99,102,241,.25); background: linear-gradient(135deg, rgba(238,242,255,.95), rgba(236,253,245,.86)); }
+        .dark .smart-check { background: linear-gradient(135deg, rgba(49,46,129,.45), rgba(6,78,59,.25)); }
+
+        .master-table-wrap { max-height: 68vh; background: rgba(255,255,255,.55); }
+        .dark .master-table-wrap { background: rgba(15,23,42,.25); }
+        .master-table { table-layout: fixed; border-collapse: separate; border-spacing: 0; }
+        .master-table th, .master-table td { padding: .48rem .58rem !important; font-size: .70rem; line-height: 1.15rem; vertical-align: middle; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .master-table thead th { position: sticky; top: 0; z-index: 8; background: #f8fafc; box-shadow: inset 0 -1px 0 rgba(148,163,184,.32); }
+        .dark .master-table thead th { background: #0f172a; }
+        .master-table tbody tr:nth-child(even) { background: rgba(248,250,252,.58); }
+        .dark .master-table tbody tr:nth-child(even) { background: rgba(15,23,42,.34); }
+        .master-table tbody tr:hover { background: rgba(238,242,255,.92); }
+        .dark .master-table tbody tr:hover { background: rgba(49,46,129,.26); }
+        .master-table th:nth-child(1), .master-table td:nth-child(1) { width: 42px; text-align: center; }
+        .master-table th:nth-child(2), .master-table td:nth-child(2) { width: 82px; }
+        .master-table th:nth-child(3), .master-table td:nth-child(3) { width: 190px; }
+        .master-table th:nth-child(4), .master-table td:nth-child(4) { width: 92px; }
+        .master-table th:nth-child(5), .master-table td:nth-child(5) { width: 112px; }
+        .master-table th:nth-child(6), .master-table td:nth-child(6) { width: 128px; }
+        .master-table th:nth-child(7), .master-table td:nth-child(7) { width: 118px; }
+        .master-table th:nth-child(8), .master-table td:nth-child(8) { width: 145px; }
+        .master-table th:nth-child(9), .master-table td:nth-child(9) { width: 90px; text-align: right; }
+        .master-table th:last-child, .master-table td:last-child { width: 78px; position: sticky; right: 0; z-index: 7; background: #fff; box-shadow: -8px 0 16px rgba(15,23,42,.06); }
+        .dark .master-table th:last-child, .dark .master-table td:last-child { background: #1e293b; }
+        .master-table thead th:last-child { z-index: 9; background: #f8fafc; }
+        .dark .master-table thead th:last-child { background: #0f172a; }
+    </style>
+</head>
+
+<body class="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950 text-slate-800 dark:text-slate-100 pb-16">
+    <div id="splash" class="fixed inset-0 z-[99] bg-gradient-to-br from-indigo-600 to-indigo-900 flex flex-col items-center justify-center text-white">
+        <div class="bg-white p-6 rounded-3xl shadow-2xl mb-7">
+            <i class="fa-solid fa-users-gear text-6xl text-indigo-600"></i>
+        </div>
+        <h1 class="text-3xl font-black">HRPro Suite</h1>
+        <p class="text-indigo-200 mt-2">Ultimate HR workflow</p>
+    </div>
+
+    <header class="sticky top-0 z-40 bg-indigo-600/95 dark:bg-indigo-900/95 text-white shadow-lg backdrop-blur">
+        <div class="max-w-7xl mx-auto p-4 flex justify-between items-center gap-3">
+            <button onclick="toggleSide()" class="text-xl"><i class="fa-solid fa-bars"></i></button>
+            <b class="hidden sm:block text-lg">HRPro Suite</b>
+            <nav class="flex bg-indigo-700 dark:bg-indigo-950 p-1 rounded-2xl overflow-x-auto scroll">
+                <button id="nav-dashboard" onclick="page('dashboard')" class="tab px-4 py-2 rounded-xl text-sm font-extrabold bg-white text-indigo-700">Dashboard</button>
+                <button id="nav-employees" onclick="page('employees')" class="tab px-4 py-2 rounded-xl text-sm font-extrabold text-indigo-100">Employees</button>
+                <button id="nav-interviews" onclick="page('interviews')" class="tab px-4 py-2 rounded-xl text-sm font-extrabold text-indigo-100">Interviews</button>
+            </nav>
+            <button onclick="openTrash()" class="relative bg-indigo-700 px-3 py-2 rounded-xl">
+                <i class="fa-solid fa-trash"></i>
+                <span id="trash-badge" class="hidden absolute -top-2 -right-2 bg-red-500 text-white text-[10px] rounded-full h-5 w-5 items-center justify-center"></span>
+            </button>
+        </div>
+    </header>
+
+    <div id="overlay" onclick="toggleSide()" class="hidden fixed inset-0 bg-black/40 z-50"></div>
+
+    <aside id="side" class="fixed z-50 inset-y-0 left-0 w-80 glass shadow-2xl p-5 transform -translate-x-full transition">
+        <div class="flex justify-between border-b dark:border-slate-700 pb-3 mb-5">
+            <b><i class="fa-solid fa-gear text-indigo-500 mr-2"></i>Settings</b>
+            <button onclick="toggleSide()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="space-y-4 text-sm">
+            <label class="block cursor-pointer">
+                <i class="fa-solid fa-file-import text-emerald-500 mr-2"></i>Import Employee Excel
+                <input type="file" accept=".xls,.xlsx" class="hidden" onchange="startImport(event,'emp')">
+            </label>
+            <div onclick="exportSelectedOrAll('emp',false)" class="cursor-pointer">
+                <i class="fa-solid fa-download text-blue-500 mr-2"></i>Export All Employees
+            </div>
+            <div onclick="exportCandidateWordTemplate()" class="cursor-pointer">
+                <i class="fa-solid fa-file-word text-purple-500 mr-2"></i>Download MS Form Word Template
+            </div>
+            <label class="block cursor-pointer">
+                <i class="fa-solid fa-cloud-arrow-up text-pink-500 mr-2"></i>Import Candidate Form Export
+                <input type="file" accept=".xls,.xlsx" class="hidden" onchange="importCandidateFormExport(event)">
+            </label>
+            <label class="block cursor-pointer">
+                <i class="fa-solid fa-file-import text-emerald-500 mr-2"></i>Import Interview Excel
+                <input type="file" accept=".xls,.xlsx" class="hidden" onchange="startImport(event,'int')">
+            </label>
+            <div onclick="exportSelectedOrAll('int',false)" class="cursor-pointer">
+                <i class="fa-solid fa-download text-blue-500 mr-2"></i>Export All Interviews
+            </div>
+            <hr class="dark:border-slate-700">
+            <div onclick="backup()" class="cursor-pointer">
+                <i class="fa-solid fa-database text-blue-500 mr-2"></i>Backup Everything
+            </div>
+            <div onclick="chooseAutoBackupFolder()" class="cursor-pointer">
+                <i class="fa-solid fa-folder-open text-amber-500 mr-2"></i>Choose Auto Backup Folder
+            </div>
+            <div onclick="autoBackupNow(true)" class="cursor-pointer">
+                <i class="fa-solid fa-floppy-disk text-indigo-500 mr-2"></i>Backup Now to Default Folder
+            </div>
+            <div onclick="autoRestoreFromDefault(true)" class="cursor-pointer">
+                <i class="fa-solid fa-rotate-left text-emerald-500 mr-2"></i>Restore From Default Folder
+            </div>
+            <div onclick="saveAndCloseApp()" class="cursor-pointer">
+                <i class="fa-solid fa-right-from-bracket text-red-500 mr-2"></i>Save Backup & Close App
+            </div>
+            <div id="auto-backup-status" class="text-[11px] text-slate-500 leading-4 bg-slate-50 dark:bg-slate-800 rounded-xl p-2">
+                Auto backup folder: not selected
+            </div>
+            <label class="block cursor-pointer">
+                <i class="fa-solid fa-upload text-emerald-500 mr-2"></i>Restore Backup
+                <input type="file" accept=".json" class="hidden" onchange="restore(event)">
+            </label>
+            <hr class="dark:border-slate-700">
+            <label><input type="checkbox" id="dark" onchange="darkMode()"> Dark Mode</label>
+        </div>
+    </aside>
+
+    <main id="page-dashboard" class="max-w-7xl mx-auto p-4 space-y-6">
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div onclick="dash('employees')" class="cursor-pointer bg-gradient-to-br from-indigo-600 to-indigo-800 text-white p-5 rounded-3xl card">
+                <p class="text-indigo-200 text-xs uppercase font-bold">Employees</p>
+                <p id="d-emp" class="text-3xl font-black">0</p>
+            </div>
+            <div onclick="dash('interviews')" class="cursor-pointer glass p-5 rounded-3xl card">
+                <p class="text-slate-500 text-xs uppercase font-bold">Interviews</p>
+                <p id="d-int" class="text-2xl font-black text-emerald-600">0</p>
+            </div>
+            <div onclick="dash('selected')" class="cursor-pointer glass p-5 rounded-3xl card">
+                <p class="text-slate-500 text-xs uppercase font-bold">Selected</p>
+                <p id="d-sel" class="text-2xl font-black text-blue-600">0</p>
+            </div>
+            <div onclick="dash('birthdays')" class="cursor-pointer glass p-5 rounded-3xl card">
+                <p class="text-slate-500 text-xs uppercase font-bold">Birthdays</p>
+                <p id="d-bday" class="text-2xl font-black text-pink-600">0</p>
+            </div>
+            <div onclick="dash('confirmed')" class="cursor-pointer glass p-5 rounded-3xl card">
+                <p class="text-slate-500 text-xs uppercase font-bold">Confirmed</p>
+                <p id="d-conf" class="text-2xl font-black text-purple-600">0</p>
+            </div>
+        </div>
+        <section class="glass rounded-3xl card p-5">
+            <div class="flex flex-wrap justify-between gap-3 mb-4">
+                <div>
+                    <h2 id="dash-title" class="font-black text-xl">Dashboard Detail</h2>
+                    <p id="dash-sub" class="text-xs text-slate-500">Interactive dashboard</p>
+                </div>
+                <div class="flex gap-2">
+                    <button id="dash-mail-primary" onclick="mailBirthdayReport()" class="btn bg-pink-600 text-white"><i class="fa-solid fa-envelope"></i><span id="dash-mail-primary-label">Mail Birthday Report</span></button>
+                    <button id="dash-mail-secondary" onclick="emailReport(true)" class="btn bg-emerald-600 text-white"><i class="fa-solid fa-envelope"></i><span id="dash-mail-secondary-label">Mail Selected Candidates Report</span></button>
+                </div>
+            </div>
+            <div id="dash-body" class="overflow-x-auto scroll"></div>
+        </section>
+    </main>
+
+    <main id="page-employees" class="hidden max-w-7xl mx-auto p-4">
+        <section class="glass rounded-3xl card p-5">
+            <div class="flex flex-wrap justify-between gap-3 border-b dark:border-slate-700 pb-4 mb-3">
+                <div>
+                    <h2 class="font-black text-xl">Employee Master</h2>
+                    <p class="text-xs text-slate-500">Select rows to export selected only. Smart import shows review table.</p>
+                </div>
+                <div class="flex gap-2 flex-wrap">
+                    <input id="emp-search" oninput="renderEmp()" placeholder="SEARCH" class="p-2 rounded-xl border dark:bg-slate-700 dark:border-slate-600 uppercase">
+                    <select id="emp-cat-filter" onchange="renderEmp()" class="p-2 rounded-xl border dark:bg-slate-700 dark:border-slate-600 text-xs font-bold min-w-[170px]">
+                        <option value="">ALL CATEGORIES</option>
+                    </select>
+                    <button onclick="clearEmpFilters()" class="btn btn-s"><i class="fa-solid fa-filter-circle-xmark"></i> Clear</button>
+                    <button onclick="exportCandidateWordTemplate()" class="btn bg-purple-600 text-white"><i class="fa-solid fa-file-word"></i> MS Form Word</button>
+                    <label class="btn bg-pink-600 text-white cursor-pointer"><i class="fa-solid fa-cloud-arrow-up"></i> Import Form Export<input type="file" accept=".xls,.xlsx" class="hidden" onchange="importCandidateFormExport(event)"></label>
+                    <label class="btn btn-e cursor-pointer">
+                        Import<input type="file" accept=".xls,.xlsx" class="hidden" onchange="startImport(event,'emp')">
+                    </label>
+                    <button onclick="exportSelectedOrAll('emp',true)" class="btn btn-s">Export Selected</button>
+                    <button onclick="openEmp()" class="btn btn-i">Add</button>
+                </div>
+            </div>
+            <div class="flex flex-wrap justify-between gap-2 mb-3">
+                <div class="flex gap-2">
+                    <button id="emp-tab-active" onclick="setEmpView('active')" class="btn btn-i"><i class="fa-solid fa-user-check"></i> Active Employees</button>
+                    <button id="emp-tab-inactive" onclick="setEmpView('inactive')" class="btn btn-s"><i class="fa-solid fa-user-slash"></i> Inactive Employees</button>
+                </div>
+                <div class="flex gap-2">
+                    <button id="emp-inactivate-btn" onclick="moveSelectedInactive()" class="btn bg-amber-500 text-white"><i class="fa-solid fa-user-minus"></i> Add Selected to Inactive</button>
+                    <button id="emp-activate-btn" onclick="moveSelectedActive()" class="hidden btn bg-emerald-600 text-white"><i class="fa-solid fa-user-plus"></i> Move Selected to Active</button>
+                    <button onclick="bulkDelete('emp')" class="btn btn-r">Delete Selected</button>
+                </div>
+            </div>
+            <div id="emp-category-summary" class="flex flex-wrap gap-2 mb-3"></div>
+            <div class="master-table-wrap overflow-auto scroll border dark:border-slate-700 rounded-2xl">
+                <table class="master-table w-full min-w-[980px] text-left">
+                    <thead>
+                        <tr id="emp-head" class="bg-slate-50 dark:bg-slate-900/40 text-xs uppercase text-slate-500"></tr>
+                    </thead>
+                    <tbody id="emp-body" class="text-xs"></tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <main id="page-interviews" class="hidden max-w-7xl mx-auto p-4">
+        <section class="glass rounded-3xl card p-5">
+            <div class="flex flex-wrap justify-between gap-3 border-b dark:border-slate-700 pb-4 mb-3">
+                <div>
+                    <h2 class="font-black text-xl">Interview Tracker</h2>
+                    <p class="text-xs text-slate-500">Stacked cards show all data in one go. Use PageUp/PageDown for tabs.</p>
+                </div>
+                <div class="flex gap-2 flex-wrap">
+                    <input id="int-search" oninput="renderInt()" placeholder="SEARCH" class="p-2 rounded-xl border dark:bg-slate-700 dark:border-slate-600 uppercase">
+                    <label class="btn btn-e cursor-pointer">
+                        Import<input type="file" accept=".xls,.xlsx" class="hidden" onchange="startImport(event,'int')">
+                    </label>
+                    <button onclick="exportSelectedOrAll('int',true)" class="btn btn-s">Export Selected</button>
+                    <button onclick="openInt()" class="btn btn-e">Add</button>
+                </div>
+            </div>
+            <div class="flex flex-wrap gap-2 mb-3 p-3 rounded-2xl bg-slate-50/80 dark:bg-slate-900/30 border dark:border-slate-700">
+                <select id="int-filter-dept" onchange="renderInt()" class="p-2 rounded-xl border dark:bg-slate-700 dark:border-slate-600 text-xs min-w-[150px]">
+                    <option value="">ALL DEPARTMENTS</option>
+                </select>
+                <select id="int-filter-color" onchange="renderInt()" class="p-2 rounded-xl border dark:bg-slate-700 dark:border-slate-600 text-xs">
+                    <option value="">ALL COLOURS</option>
+                    <option value="green">GREEN</option>
+                    <option value="blue">BLUE</option>
+                    <option value="red">RED</option>
+                    <option value="yellow">YELLOW</option>
+                    <option value="purple">PURPLE</option>
+                    <option value="none">NO COLOUR</option>
+                </select>
+                <input id="int-filter-hr" oninput="renderInt()" placeholder="HR ROUND / DATE" class="p-2 rounded-xl border dark:bg-slate-700 dark:border-slate-600 text-xs uppercase min-w-[145px]">
+                <input id="int-filter-exp" oninput="renderInt()" placeholder="TOTAL EXPERIENCE" class="p-2 rounded-xl border dark:bg-slate-700 dark:border-slate-600 text-xs uppercase min-w-[145px]">
+                <select id="int-filter-status" onchange="renderInt()" class="p-2 rounded-xl border dark:bg-slate-700 dark:border-slate-600 text-xs">
+                    <option value="">ALL STATUS</option>
+                    <option>PLANNED</option>
+                    <option>DONE</option>
+                    <option>SELECTED</option>
+                    <option>REJECTED</option>
+                    <option>ON HOLD</option>
+                    <option>JOINED</option>
+                </select>
+                <button onclick="clearIntFilters()" class="btn btn-s"><i class="fa-solid fa-filter-circle-xmark"></i>Clear Filters</button>
+            </div>
+            <div class="flex flex-wrap gap-2 mb-3">
+                <select id="bulk-status" class="p-2 rounded-xl border dark:bg-slate-700 dark:border-slate-600 text-xs">
+                    <option value="">--STATUS--</option>
+                    <option>PLANNED</option>
+                    <option>DONE</option>
+                    <option>SELECTED</option>
+                    <option>REJECTED</option>
+                    <option>ON HOLD</option>
+                    <option>JOINED</option>
+                </select>
+                <button onclick="bulkStatus()" class="btn btn-i">Update Selected</button>
+                <button onclick="emailReport(false)" class="btn btn-e">Email Selected Table</button>
+                <button onclick="openReminder()" class="btn bg-purple-600 text-white"><i class="fa-solid fa-bell"></i> Set Reminder</button>
+                <button onclick="bulkDelete('int')" class="btn btn-r">Delete Selected</button>
+            </div>
+            <div id="int-stack" class="grid grid-cols-1 lg:grid-cols-2 gap-4"></div>
+        </section>
+    </main>
+
+    <div id="emp-modal" class="hidden fixed inset-0 z-[70] bg-black/50 p-4 items-center justify-center">
+        <div class="glass rounded-3xl modal-shell w-full max-w-7xl max-h-[94vh] flex flex-col">
+            <div class="emp-hero p-5 flex justify-between items-center">
+                <div>
+                    <p class="text-xs uppercase tracking-[.24em] text-indigo-100 font-black">Employee Master Entry</p>
+                    <b class="text-2xl font-black"><i class="fa-solid fa-id-card-clip mr-2"></i>Add / Edit Employee</b>
+                    <p class="text-xs text-indigo-100 mt-1">Smart tabs, auto copy, father-name sync, total gross, and confirmation dashboard improvements.</p>
+                </div>
+                <button onclick="closeEmp()" class="h-10 w-10 rounded-2xl bg-white/15 hover:bg-white/25"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="emp-tabs" class="p-3 flex flex-wrap gap-2 bg-slate-50/70 dark:bg-slate-900/30 border-b dark:border-slate-700"></div>
+            <form id="emp-form" onsubmit="saveEmp(event)" class="p-5 grid grid-cols-1 md:grid-cols-3 gap-4 overflow-y-auto scroll bg-slate-50/60 dark:bg-slate-950/20"></form>
+        </div>
+    </div>
+
+    <div id="int-modal" class="hidden fixed inset-0 z-[70] bg-black/50 p-4 items-center justify-center">
+        <div class="glass rounded-3xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col">
+            <div class="p-4 border-b dark:border-slate-700 flex justify-between">
+                <b>Interview Entry</b>
+                <button onclick="closeInt()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="int-form" onsubmit="saveInt(event)" class="p-5 grid grid-cols-1 md:grid-cols-3 gap-4 overflow-y-auto scroll"></form>
+        </div>
+    </div>
+
+    <div id="trash-modal" class="hidden fixed inset-0 z-[80] bg-black/50 p-4 items-center justify-center">
+        <div class="glass rounded-3xl shadow-xl w-full max-w-4xl max-h-[85vh] flex flex-col">
+            <div class="p-4 border-b dark:border-slate-700 flex justify-between">
+                <b><i class="fa-solid fa-trash-arrow-up mr-2"></i>Recycle Bin</b>
+                <button onclick="openTrash()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="trash-list" class="p-4 overflow-y-auto scroll"></div>
+            <div class="p-4 text-right border-t dark:border-slate-700">
+                <button onclick="emptyTrash()" class="btn btn-r">Empty Trash Permanently</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="import-modal" class="hidden fixed inset-0 z-[85] bg-black/50 p-4 items-center justify-center">
+        <div class="glass rounded-3xl shadow-xl w-full max-w-5xl max-h-[85vh] flex flex-col">
+            <div class="p-4 border-b dark:border-slate-700 flex justify-between">
+                <b id="import-title">Review Import</b>
+                <button onclick="closeImport()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="import-body" class="p-4 overflow-y-auto scroll"></div>
+            <div class="p-4 border-t dark:border-slate-700 text-right">
+                <button onclick="confirmImport()" class="btn btn-e">Import Selected</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="reminder-modal" class="hidden fixed inset-0 z-[95] bg-black/50 p-4 items-center justify-center">
+        <div class="glass rounded-3xl shadow-xl w-full max-w-md">
+            <div class="p-4 border-b dark:border-slate-700 flex justify-between">
+                <b><i class="fa-solid fa-bell text-purple-600 mr-2"></i>Create Interview Reminder</b>
+                <button onclick="closeReminder()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form onsubmit="saveReminder(event)" class="p-5 space-y-4">
+                <p id="reminder-summary" class="text-xs text-slate-500"></p>
+                <label class="block text-xs font-bold">Reminder Date<input id="reminder-date" type="date" required class="mt-1 w-full p-2 rounded-xl border dark:bg-slate-700 dark:border-slate-600"></label>
+                <label class="block text-xs font-bold">Reminder Time<input id="reminder-time" type="time" required class="mt-1 w-full p-2 rounded-xl border dark:bg-slate-700 dark:border-slate-600"></label>
+                <label class="block text-xs font-bold">Message<input id="reminder-message" placeholder="INTERVIEW REMINDER" class="mt-1 w-full p-2 rounded-xl border dark:bg-slate-700 dark:border-slate-600 uppercase"></label>
+                <div class="text-right"><button type="button" onclick="closeReminder()" class="btn btn-s">Cancel</button> <button class="btn bg-purple-600 text-white">Save Reminder</button></div>
+            </form>
+        </div>
+    </div>
+    <div id="toast" class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-[110] bg-slate-800 dark:bg-slate-100 text-white dark:text-slate-900 px-6 py-3 rounded-full shadow-lg text-sm font-medium toast"></div>
+
+    <script>
+        const EMP_COLS = ["EMP ID", "PUCH ID", "Sr.No.", "Name", "Father's / Husband's Name", " Date Of Birth\nDD.MM.YYYY", "age", "Gender", " Marital Status", "LOC. ADD 1 \nhouse/flat/block no/name of the primises/buliding/village(at.:)", "LOC. ADD 2 \nroad/street/lane/post off.", "LOC. ADD 3\nArea/locality/Taluka/Sub-Div.", " LOC. ADD 4 \ntown/city/dist.", "LOC. ADD 5 \nP.Code.", "LOC. ADD 6\nstate/u.t.", "PRMT. ADD 1 \nhouse/flat/block no/name of the primises/buliding/village(at.:)", "PRMT. ADD 2 \nroad/street/lane/post off.", "PRMT. ADD 3\nArea/locality/Taluka/Sub-Div.", " PRMT. ADD 4 \ntown/city/dist.", "PRMT. ADD 5 \nP.Code.", "PRMT. ADD 6\nstate/u.t.", "D.O.J TRAINING\nDD.MM.YYYY", "END OF PROBATION", "NAME OF THE \nnominee 1", "RELATION\nNOMINEE # 1", "AGE/ \nNOMINEE # 1", "%", "MOTHER NAME", "RELATION", "MIMIMUM WAGES PER MONTH", "PF ACCOUNT", "REFRE.PERSON NAME-1", "Through Reference/DEPARTMENT NAME", "Name of Reference  Person", "See Vacancy on Notice Board", "MOBILE NUMBER", "BACK GROUND NAME-", "BACK GROUND NAME-MOBILE NUMBER", "which post/Relation", "BACK GROUND NAME-", "BACK GROUND NAME-MOBILE NUMBER", "which post/Relation", " RELIGION", "PLACE OF \nBIRTH", "HEIGHT (cm)", "IDENTIFICATON \nMARKS", " EDUCATIONAL QUALIFICATION", "Technical Qualification", " LIC /INSURANCEPOLICY #", "Contact # NUMBER OF EMPLOYEE", "Previous Employer Name  ", "Previous Employer ADDRESS", "Previous Designation  ", "Previous DEPARTMENT", "FROM Period", "TO Period", "wages/salary", "Reason of Leaving", "Category of Workman", "DESIGNATION", "BASIC", "CONVENIANCE", " HRA ", "EDUCATION      ALL", "PERFORMANCE ALL", "MED. ALL", "TOTAL GROSS", "DEPT. ", "DIVISION", "E.S.I.C. #", "EMPLOYEE CODE #", "REF. NAME 1  IN APPPLICATION FORM", "REF. ADD1", "REF. NAME 2 FOR APPLICATION FORM ", "COMPANY REF. NAME FULL ADDRES FOR APPLICATION FORM", "FATHER NAME /HUSBAND ", "D O B/AGE", "Relation ", "MOTHER /WIFE ", "D O B/AGE", "Relation ", "SPOUSE NAME", "D OB/AGE", "Relation ", "SON/DAUGHTER", "D OB/AGE", "Relation ", "CONTACT NUMBER OF WITNESS", "WITNESS 2  ADD", "BANK  ACCOUNT  OPEN", "TOTAL ADD LOCAL", "TOTAL ADD PERMAMENT", "Maternity Benefit", "INTERVIEW DATE", "FAZE 3 EMPLOYEE REFRE.NAME", "FAZE 3 EMPLOYEE REFRE.NAME MOBILE NUMBER", "PUNCHING ID", "AADHAR CARD NO", "PAN CARD NO", "PASSPORT NO."];
+        const INT_COLS = ["SR", "Candidate Name", "Department", "Qualification", "College/Institute", "Last/ Current Association", "Last designation hold", "Total Experience", "Current or Last Salary", "Expected Salary", "Notice period", "Remarks", "HR round", "mailed to head", "INTERVIEW DATE'", "OFFER LETTER", "JOINING DATE", "STATUS"];
+        const EV = [['EMP ID', 0], ['NAME', 3], ['DOB', 5], ['CONFIRMATION', 22], ['CATEGORY', 58], ['DEPT', 67], ['DESIG', 59], ['GROSS', 66]];
+        const GROUPS = [['PERSONAL', [0, 1, 2, 3, 4, 5, 6, 7, 8, 42, 43, 44, 45, 46, 47, 48, 49, 50, 96, 97, 98]], ['ADDRESS', [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 90, 91]], ['PROFESSIONAL', [21, 22, 31, 32, 33, 34, 35, 51, 52, 53, 54, 55, 56, 57, 58, 59, 67, 68]], ['SALARY', [29, 30, 60, 61, 62, 63, 64, 65, 66, 69, 70]], ['FAMILY', [23, 24, 25, 26, 27, 28, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86]], ['OTHER', [36, 37, 38, 39, 40, 41, 71, 72, 73, 74, 87, 88, 89, 92, 93, 94, 95]]];
+        
+        let employees = [], interviews = [], trash = [], reminders = [], settings = { theme: 'light' }, empStep = 0, editEmpId = null, empDraft = null, pendingImport = null, empView = 'active', birthdayCategory = '', reminderInterviewIds = [];
+        const DB = 'HRPRO_ULTIMATE_V9';
+        const CLOUD_API = '/api/data';
+        let cloudSaveTimer = null;
+
+        function currentState() {
+            return { employees, interviews, trash, reminders, settings };
+        }
+
+        async function apiLoadData() {
+            const res = await fetch(CLOUD_API);
+            if (!res.ok) throw new Error('Cloud load failed');
+            return await res.json();
+        }
+
+        async function apiSaveDataNow() {
+            try {
+                const res = await fetch(CLOUD_API, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(currentState())
+                });
+                if (!res.ok) throw new Error('Cloud save failed');
+                console.log('Cloud data saved');
+            } catch (error) {
+                console.error('Cloud save error:', error);
+            }
+        }
+
+        function scheduleCloudSave() {
+            clearTimeout(cloudSaveTimer);
+            cloudSaveTimer = setTimeout(apiSaveDataNow, 800);
+        }
+
+        function U(v) { return String(v ?? '').trim().toUpperCase() }
+        function N(v) { return String(v || '').toLowerCase().replace(/\s+/g, ' ').replace(/[.#:/()']/g, '').trim() }
+        function p2(n) { return String(n).padStart(2, '0') }
+        function xdate(v) {
+            let n = Number(v);
+            if (!Number.isFinite(n) || n <= 0) return U(v);
+            let d = new Date(Date.UTC(1899, 11, 30) + Math.round(n) * 86400000);
+            return p2(d.getUTCDate()) + '/' + p2(d.getUTCMonth() + 1) + '/' + d.getUTCFullYear()
+        }
+        function isDate(cols, i) {
+            let h = U(cols[i] || '');
+            return !h.includes('PLACE OF BIRTH') && (h.includes('DATE') || h.includes('DOB') || h.includes('D O B') || h.includes('D.O.J') || h.includes('JOINING') || h.includes('PROBATION') || h.includes('PERIOD'))
+        }
+        function V(v, cols, i) {
+            let r = String(v ?? '').trim();
+            return isDate(cols, i) && r !== '' && !isNaN(Number(r)) ? xdate(r) : U(r)
+        }
+        function idx(cols, names) {
+            let w = names.map(N);
+            for (let i = 0; i < cols.length; i++) if (w.includes(N(cols[i]))) return i;
+            return -1
+        }
+        
+        const EI = { emp: idx(EMP_COLS, ['EMP ID']), punch: idx(EMP_COLS, ['PUCH ID', 'PUNCHING ID']), name: idx(EMP_COLS, ['Name']), dob: idx(EMP_COLS, [' Date Of Birth DD.MM.YYYY']), conf: idx(EMP_COLS, ['END OF PROBATION']), dept: idx(EMP_COLS, ['DEPT. ']), desig: idx(EMP_COLS, ['DESIGNATION']) };
+        const II = { sr: idx(INT_COLS, ['SR']), name: idx(INT_COLS, ['Candidate Name']), dept: idx(INT_COLS, ['Department']), date: idx(INT_COLS, ["INTERVIEW DATE'"]), status: idx(INT_COLS, ['STATUS']) };
+
+        function C(r, i) { return r && r.cols && i >= 0 ? (r.cols[i] || '') : '' }
+        function se(e) { e.cols = (e.cols || []).map((v, i) => V(v, EMP_COLS, i)); e.code = C(e, EI.emp) || C(e, EI.punch); e.name = C(e, EI.name); e.status = e.status === 'inactive' ? 'inactive' : 'active'; e.exitDate = e.exitDate || ''; return e }
+        function si(x) { x.cols = (x.cols || []).map((v, i) => V(v, INT_COLS, i)); x.candidate = C(x, II.name); return x }
+        
+        const AUTO_BACKUP_FILE = 'HRPro_AUTO_BACKUP.json';
+        const AUTO_IDB_NAME = 'HRProAutoBackupHandles';
+        const AUTO_IDB_STORE = 'handles';
+        let autoDirHandle = null, autoBackupTimer = null, autoBackupBusy = false, bootingFromBackup = false;
+
+        function backupPayload() {
+            return { employees, interviews, trash, reminders, settings, version: 'ultimate-v11-auto-folder-backup', savedAt: new Date().toISOString() }
+        }
+        function applyBackupPayload(p) {
+            employees = p.employees || [];
+            interviews = p.interviews || [];
+            trash = p.trash || [];
+            reminders = p.reminders || [];
+            settings = { theme: 'light', ...(p.settings || {}) };
+        }
+        function save() {
+            localStorage.setItem(DB, JSON.stringify(currentState()));
+            scheduleCloudSave();
+            scheduleAutoBackup();
+        }
+        async function load() {
+            try {
+                let p = await apiLoadData();
+                applyBackupPayload(p || {});
+                localStorage.setItem(DB, JSON.stringify(currentState()));
+                console.log('Cloud data loaded');
+            } catch (error) {
+                console.error('Cloud load error:', error);
+                let p = JSON.parse(localStorage.getItem(DB) || '{}');
+                applyBackupPayload(p);
+                console.log('Loaded from local browser backup');
+            }
+        }
+
+        async function boot() {
+            try {
+                bootingFromBackup = true;
+                await load();
+                await initAutoBackupFolder();
+                applyTheme();
+                renderAll();
+                bootingFromBackup = false;
+                setTimeout(() => document.getElementById('splash').classList.add('hide'), 350)
+            } catch (e) {
+                bootingFromBackup = false;
+                alert('Startup recovered: ' + e.message);
+                document.getElementById('splash').classList.add('hide')
+            }
+        }
+        document.addEventListener('DOMContentLoaded', boot);
+        
+        document.addEventListener('keydown', e => {
+            if (e.key === 'PageDown') { e.preventDefault(); nextPage(1) }
+            if (e.key === 'PageUp') { e.preventDefault(); nextPage(-1) }
+        });
+
+        function nextPage(d) {
+            let pages = ['dashboard', 'employees', 'interviews'];
+            let cur = pages.findIndex(p => !document.getElementById('page-' + p).classList.contains('hidden'));
+            page(pages[(cur + d + pages.length) % pages.length])
+        }
+
+        function toast(m) {
+            let t = document.getElementById('toast');
+            t.innerText = m;
+            t.classList.remove('hidden');
+            setTimeout(() => t.classList.add('hidden'), 3000)
+        }
+
+        function toggleSide() {
+            document.getElementById('side').classList.toggle('-translate-x-full');
+            document.getElementById('overlay').classList.toggle('hidden')
+        }
+
+        function darkMode() {
+            settings.theme = document.getElementById('dark').checked ? 'dark' : 'light';
+            applyTheme();
+            save()
+        }
+
+        function applyTheme() {
+            document.documentElement.classList.toggle('dark', settings.theme === 'dark');
+            let darkEl = document.getElementById('dark');
+            if (darkEl) darkEl.checked = settings.theme === 'dark'
+        }
+
+        function page(p) {
+            ['dashboard', 'employees', 'interviews'].forEach(x => {
+                document.getElementById('page-' + x).classList.toggle('hidden', x !== p);
+                document.getElementById('nav-' + x).className = 'tab px-4 py-2 rounded-xl text-sm font-extrabold ' + (x === p ? 'bg-white dark:bg-slate-700 text-indigo-700 dark:text-white' : 'text-indigo-100')
+            });
+            if (p === 'interviews') renderInt()
+        }
+
+        function renderAll() {
+            employees = employees.map(se);
+            interviews = interviews.map(si);
+            dash();
+            renderEmp();
+            renderInt();
+            updateTrash();
+            scheduleAllReminders()
+        }
+
+        function setBirthdayCategory(v) { birthdayCategory = U(v || ''); dash('birthdays') }
+        function birthdays() {
+            let m = new Date().getMonth() + 1;
+            return employees.filter(e => {
+                if (e.status !== 'active') return false;
+                let x = C(e, EI.dob).match(/(\d{1,2})\/(\d{1,2})\/\d{4}/);
+                return x && +x[2] === m
+            }).sort((a, b) => {
+                let da = C(a, EI.dob).match(/(\d{1,2})\//);
+                let db = C(b, EI.dob).match(/(\d{1,2})\//);
+                return (+da[1] || 0) - (+db[1] || 0);
+            })
+        }
+
+        function parseDMY(v) {
+            let x = String(v || '').match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+            if (!x) return null;
+            return { d: +x[1], m: +x[2], y: +x[3] };
+        }
+        function monthName(m) {
+            return ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'][m - 1] || '';
+        }
+        function confirmationBucket(emp) {
+            let raw = parseDMY(C(emp, EI.conf));
+            if (!raw) return null;
+            let m = raw.m, y = raw.y;
+            if (raw.d >= 16) {
+                m++;
+                if (m > 12) { m = 1; y++; }
+            }
+            return { ...raw, effM: m, effY: y, label: monthName(m) + '-' + y };
+        }
+        function confirmed() {
+            let now = new Date();
+            let targets = [];
+            for (let add = 0; add <= 1; add++) {
+                let d = new Date(now.getFullYear(), now.getMonth() + add, 1);
+                targets.push({ m: d.getMonth() + 1, y: d.getFullYear() });
+            }
+            return employees.filter(e => {
+                if (e.status !== 'active') return false;
+                let b = confirmationBucket(e);
+                return b && targets.some(t => t.m === b.effM && t.y === b.effY);
+            }).sort((a, b) => {
+                let aa = confirmationBucket(a), bb = confirmationBucket(b);
+                return (aa.effY - bb.effY) || (aa.effM - bb.effM) || (aa.d - bb.d);
+            })
+        }
+
+        function setDashActions(mode) {
+            let p = document.getElementById('dash-mail-primary'), s = document.getElementById('dash-mail-secondary');
+            let pl = document.getElementById('dash-mail-primary-label'), sl = document.getElementById('dash-mail-secondary-label');
+            if (!p || !s || !pl || !sl) return;
+            p.classList.remove('hidden');
+            s.classList.remove('hidden');
+            if (mode === 'confirmed') {
+                p.setAttribute('onclick', 'mailConfirmationReport()');
+                p.className = 'btn bg-purple-600 text-white';
+                pl.innerText = 'Mail Confirmation Report';
+                s.classList.add('hidden');
+            } else if (mode === 'selected') {
+                setDashActions('selected');
+                p.classList.add('hidden');
+                s.setAttribute('onclick', 'emailReport(true)');
+                s.className = 'btn bg-emerald-600 text-white';
+                sl.innerText = 'Mail Selected Candidates Report';
+            } else {
+                p.setAttribute('onclick', 'mailBirthdayReport()');
+                p.className = 'btn bg-pink-600 text-white';
+                pl.innerText = 'Mail Birthday Report';
+                s.classList.add('hidden');
+            }
+        }
+        function dash(mode) {
+            dEmp();
+            if (mode === 'employees') { page('employees'); return }
+            if (mode === 'interviews') { page('interviews'); return }
+            let title = document.getElementById('dash-title'), sub = document.getElementById('dash-sub'), body = document.getElementById('dash-body');
+            if (!body) return;
+            let list = [], head = '', rows = [], pre = '';
+            if (!mode) mode = 'birthdays';
+            
+            if (mode === 'birthdays') {
+                setDashActions('birthdays');
+                title.innerHTML = 'Birthdays This Month';
+                sub.innerText = 'Select employees and filter birthdays category wise.';
+                let allBirthdays = birthdays();
+                let cats = [...new Set(allBirthdays.map(e => C(e, 58)).filter(Boolean))].sort();
+                list = birthdayCategory ? allBirthdays.filter(e => C(e, 58) === birthdayCategory) : allBirthdays;
+                pre = `<div class="flex flex-wrap items-center gap-2 mb-3 p-3 rounded-2xl bg-pink-50/80 dark:bg-pink-900/20 border dark:border-slate-700"><b class="text-xs text-pink-700 dark:text-pink-200"><i class="fa-solid fa-cake-candles mr-1"></i>Birthday Category Filter</b><select onchange="setBirthdayCategory(this.value)" class="p-2 rounded-xl border dark:bg-slate-700 dark:border-slate-600 text-xs font-bold min-w-[180px]"><option value="">ALL CATEGORIES</option>${cats.map(c => `<option value="${E(c)}" ${birthdayCategory === c ? 'selected' : ''}>${c}</option>`).join('')}</select><button onclick="setBirthdayCategory('')" class="btn btn-s"><i class="fa-solid fa-filter-circle-xmark"></i>Clear</button>${cats.map(c => `<button onclick="setBirthdayCategory('${E(c)}')" class="chip ${birthdayCategory === c ? 'bg-pink-600 text-white' : 'bg-pink-100 text-pink-700 dark:bg-pink-900 dark:text-pink-200'}"><i class="fa-solid fa-layer-group mr-1"></i>${c}: ${allBirthdays.filter(e => C(e, 58) === c).length}</button>`).join('')}</div>`;
+                head = '<th class=p-3><input type=checkbox onchange="toggleAll(\'.bday-check\',this.checked)"></th><th class=p-3>Day</th><th class=p-3>Employee</th><th class=p-3>Category</th><th class=p-3>Dept</th><th class=p-3>DOB</th><th class=p-3>Mail</th>';
+                rows = list.map(e => { let d = (C(e, EI.dob).match(/^(\d{1,2})\//) || [,''])[1]; return `<td class=p-3><input class=bday-check type=checkbox value="${e.id}"></td><td class="p-3 font-black text-pink-600">${d}</td><td class="p-3 font-bold">${C(e, EI.name)}</td><td class="p-3 font-black text-indigo-600">${C(e, 58)}</td><td class=p-3>${C(e, EI.dept)}</td><td class=p-3>${C(e, EI.dob)}</td><td class=p-3><button onclick="mailBday('${e.id}')" class="btn bg-pink-600 text-white">Plain</button> <button onclick="emlBday('${e.id}')" class="btn btn-s">HTML</button></td>` })
+            } else if (mode === 'confirmed') {
+                setDashActions('confirmed');
+                title.innerHTML = 'Confirmations - This Month & Next Month';
+                sub.innerText = 'Shows current and next month. Rule: 1-15 same month, 16 onward next month.';
+                list = confirmed();
+                head = '<th class=p-3>Employee</th><th class=p-3>Dept</th><th class=p-3>Designation</th><th class=p-3>Confirmation Date</th><th class=p-3>Confirmation Month</th>'; 
+                rows = list.map(e => { let b = confirmationBucket(e); return `<td class="p-3 font-bold">${C(e, EI.name)}</td><td class=p-3>${C(e, EI.dept)}</td><td class=p-3>${C(e, EI.desig)}</td><td class=p-3>${C(e, EI.conf)}</td><td class="p-3 font-black text-purple-600">${b ? b.label : ''}</td>` })
+            } else if (mode === 'selected') {
+                title.innerHTML = 'Selected Candidates';
+                sub.innerText = 'Whole selected candidates table.';
+                list = interviews.filter(i => C(i, II.status) === 'SELECTED');
+                head = INT_COLS.map(c => `<th class=p-3>${c}</th>`).join('');
+                rows = list.map(i => INT_COLS.map((c, x) => `<td class=p-3>${C(i, x)}</td>`).join(''))
+            }
+            body.innerHTML = pre + `<table class="w-full min-w-[850px] text-left"><thead class="bg-slate-50 dark:bg-slate-900/40 text-xs uppercase text-slate-500"><tr>${head}</tr></thead><tbody class=text-xs>${rows.length ? rows.map(r => `<tr class="border-t dark:border-slate-700">${r}</tr>`).join('') : `<tr><td colspan=10 class="p-8 text-center text-slate-400">NO RECORDS.</td></tr>`}</tbody></table>`
+        }
+
+        function dEmp() {
+            document.getElementById('d-emp').innerText = employees.length;
+            document.getElementById('d-int').innerText = interviews.length;
+            document.getElementById('d-sel').innerText = interviews.filter(i => C(i, II.status) === 'SELECTED').length;
+            document.getElementById('d-bday').innerText = birthdays().length;
+            document.getElementById('d-conf').innerText = confirmed().length
+        }
+
+        function E(v) { return String(v || '').replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;') }
+        
+        function setEmpView(view) {
+            empView = view;
+            renderEmp();
+        }
+        function renderEmp() {
+            fillEmpCategoryOptions();
+            let q = U(empSearch()?.value || ''), cat = U(empCatFilter()?.value || '');
+            let rows = employees.filter(e => e.status === empView && (!q || e.cols.join(' ').includes(q)) && (!cat || C(e, 58) === cat));
+            let activeTab = document.getElementById('emp-tab-active'), inactiveTab = document.getElementById('emp-tab-inactive');
+            if (activeTab) activeTab.className = 'btn ' + (empView === 'active' ? 'btn-i' : 'btn-s');
+            if (inactiveTab) inactiveTab.className = 'btn ' + (empView === 'inactive' ? 'btn-i' : 'btn-s');
+            document.getElementById('emp-inactivate-btn')?.classList.toggle('hidden', empView !== 'active');
+            document.getElementById('emp-activate-btn')?.classList.toggle('hidden', empView !== 'inactive');
+            let summary = document.getElementById('emp-category-summary');
+            if (summary) {
+                let source = employees.filter(e => e.status === empView);
+                let counts = {};
+                source.forEach(e => { let c = C(e, 58) || 'NO CATEGORY'; counts[c] = (counts[c] || 0) + 1; });
+                let activeCat = U(empCatFilter()?.value || '');
+                summary.innerHTML = `<span class="chip bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-200"><i class="fa-solid fa-table-list mr-1"></i>Showing ${rows.length} / ${source.length}</span>` + Object.keys(counts).sort().map(c => `<button onclick="document.getElementById('emp-cat-filter').value='${E(c === 'NO CATEGORY' ? '' : c)}';renderEmp()" class="chip ${activeCat === U(c) ? 'bg-indigo-600 text-white' : 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200'}"><i class="fa-solid fa-layer-group mr-1"></i>${c}: ${counts[c]}</button>`).join('');
+            }
+            let head = '<th class=p-3><input type=checkbox onchange="toggleAll(\'.emp-check\',this.checked)"></th>' + EV.map(v => `<th class="p-3 th">${v[0]}</th>`).join('') + (empView === 'inactive' ? '<th class=p-3>Date of Exit</th>' : '') + '<th class=p-3>Action</th>';
+            document.getElementById('emp-head').innerHTML = head;
+            document.getElementById('emp-body').innerHTML = rows.length ? rows.map(e => `<tr class="border-t dark:border-slate-700"><td class=p-3><input class=emp-check type=checkbox value="${e.id}"></td>${EV.map(v => `<td class="p-3 whitespace-nowrap ${v[1] === EI.name ? 'font-bold' : ''}">${C(e, v[1])}</td>`).join('')}${empView === 'inactive' ? `<td class=p-3>${e.exitDate || ''}</td>` : ''}<td class=p-3><button onclick="openEmp('${e.id}')" class=text-indigo-500><i class="fa-solid fa-pen"></i></button> <button onclick="del('emp','${e.id}')" class=text-red-500><i class="fa-solid fa-trash-can"></i></button></td></tr>`).join('') : `<tr><td colspan=12 class="p-8 text-center text-slate-400">NO ${empView.toUpperCase()} EMPLOYEES</td></tr>`;
+        }
+        function moveSelectedInactive() {
+            let ids = selectedIds('.emp-check');
+            if (!ids.length) return toast('SELECT ACTIVE EMPLOYEES FIRST');
+            let exitDate = prompt('Enter Date of Exit (DD/MM/YYYY):');
+            if (exitDate === null) return;
+            exitDate = exitDate.trim();
+            if (!/^\d{2}\/\d{2}\/\d{4}$/.test(exitDate)) return toast('USE DATE FORMAT DD/MM/YYYY');
+            employees.forEach(e => { if (ids.includes(e.id)) { e.status = 'inactive'; e.exitDate = exitDate; } });
+            save(); renderAll(); toast('SELECTED EMPLOYEES ADDED TO INACTIVE');
+        }
+        function moveSelectedActive() {
+            let ids = selectedIds('.emp-check');
+            if (!ids.length) return toast('SELECT INACTIVE EMPLOYEES FIRST');
+            employees.forEach(e => { if (ids.includes(e.id)) { e.status = 'active'; e.exitDate = ''; } });
+            save(); renderAll(); toast('SELECTED EMPLOYEES MOVED TO ACTIVE');
+        }
+        function empSearch() { return document.getElementById('emp-search') }
+        function empCatFilter() { return document.getElementById('emp-cat-filter') }
+        function fillEmpCategoryOptions() {
+            let sel = empCatFilter();
+            if (!sel) return;
+            let cur = sel.value;
+            let vals = [...new Set(employees.filter(e => e.status === empView).map(e => C(e, 58)).filter(Boolean))].sort();
+            sel.innerHTML = '<option value="">ALL CATEGORIES</option>' + vals.map(v => `<option value="${E(v)}">${v}</option>`).join('');
+            sel.value = vals.includes(cur) ? cur : '';
+        }
+        function clearEmpFilters() {
+            let s = empSearch(), c = empCatFilter();
+            if (s) s.value = '';
+            if (c) c.value = '';
+            renderEmp();
+        }
+
+        function openEmp(id) {
+            editEmpId = id || null;
+            empStep = 0;
+            let e = editEmpId ? employees.find(x => x.id === editEmpId) : null;
+            empDraft = e?.cols ? [...e.cols] : Array(EMP_COLS.length).fill('');
+            drawEmp();
+            let modal = document.getElementById('emp-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex')
+        }
+        function closeEmp() {
+            empDraft = null;
+            let modal = document.getElementById('emp-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex')
+        }
+        const LOCAL_ADDR_IDX = [9, 10, 11, 12, 13, 14];
+        const PERM_ADDR_IDX = [15, 16, 17, 18, 19, 20];
+        const SALARY_PART_IDX = [60, 61, 62, 63, 64, 65];
+        const GROSS_IDX = 66;
+        const PERSONAL_FATHER_IDX = 4;
+        const FAMILY_FATHER_IDX = 75;
+        function numVal(v) { let n = Number(String(v || '').replace(/,/g, '').trim()); return Number.isFinite(n) ? n : 0; }
+        function moneyFmt(n) { return Number.isInteger(n) ? String(n) : n.toFixed(2).replace(/\.00$/, ''); }
+        function updateVisibleField(i, val) { let el = document.querySelector(`#emp-form [data-i="${i}"]`); if (el) el.value = val || ''; }
+        function syncFather(src) { if (!empDraft) return; let dst = src === PERSONAL_FATHER_IDX ? FAMILY_FATHER_IDX : src === FAMILY_FATHER_IDX ? PERSONAL_FATHER_IDX : -1; if (dst < 0) return; empDraft[dst] = empDraft[src] || ''; updateVisibleField(dst, empDraft[dst]); }
+        function copyCurrentToPermanent(force) { if (!empDraft) return; let cb = document.getElementById('same-address'); if (!force && (!cb || !cb.checked)) return; LOCAL_ADDR_IDX.forEach((src, pos) => { let dst = PERM_ADDR_IDX[pos]; empDraft[dst] = empDraft[src] || ''; updateVisibleField(dst, empDraft[dst]); }); if (cb) cb.checked = true; }
+        function calcGross() { if (!empDraft) return; let total = SALARY_PART_IDX.reduce((sum, i) => sum + numVal(empDraft[i]), 0); empDraft[GROSS_IDX] = total ? moneyFmt(total) : ''; updateVisibleField(GROSS_IDX, empDraft[GROSS_IDX]); }
+        function empFieldInput(el) { el.value = el.value.toUpperCase(); let i = +el.dataset.i; empDraft[i] = V(el.value, EMP_COLS, i); if (i === PERSONAL_FATHER_IDX || i === FAMILY_FATHER_IDX) syncFather(i); if (LOCAL_ADDR_IDX.includes(i)) copyCurrentToPermanent(false); if (SALARY_PART_IDX.includes(i)) calcGross(); }
+        function captureEmpForm() { if (!empDraft) empDraft = Array(EMP_COLS.length).fill(''); document.querySelectorAll('#emp-form [data-i]').forEach(x => empDraft[+x.dataset.i] = V(x.value, EMP_COLS, +x.dataset.i)); calcGross(); }
+        function empGo(i) { captureEmpForm(); empStep = Math.max(0, Math.min(GROUPS.length - 1, i)); drawEmp(); }
+        function sectionIcon(name) { return ({ PERSONAL: 'fa-user-tie', ADDRESS: 'fa-location-dot', PROFESSIONAL: 'fa-briefcase', SALARY: 'fa-indian-rupee-sign', FAMILY: 'fa-people-roof', OTHER: 'fa-folder-open' })[name] || 'fa-circle-info'; }
+        function fieldIcon(i) { if ([3,4,27,75,78,81].includes(i)) return 'fa-user'; if (LOCAL_ADDR_IDX.includes(i) || PERM_ADDR_IDX.includes(i)) return 'fa-map-pin'; if (SALARY_PART_IDX.includes(i) || i === GROSS_IDX) return 'fa-indian-rupee-sign'; if (isDate(EMP_COLS, i)) return 'fa-calendar-days'; if (U(EMP_COLS[i]).includes('MOBILE') || U(EMP_COLS[i]).includes('CONTACT')) return 'fa-phone'; return 'fa-keyboard'; }
+        function drawEmp() {
+            if (!empDraft) { let e = editEmpId ? employees.find(x => x.id === editEmpId) : null; empDraft = e?.cols ? [...e.cols] : Array(EMP_COLS.length).fill(''); }
+            calcGross();
+            let g = GROUPS[empStep];
+            document.getElementById('emp-tabs').innerHTML = GROUPS.map((x, i) => `<button type=button onclick="empGo(${i})" class="emp-tab px-4 py-2 rounded-2xl text-xs font-black ${i === empStep ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/25' : 'bg-white/80 dark:bg-slate-800 text-slate-600 dark:text-slate-200'}"><span class="inline-flex h-6 w-6 items-center justify-center rounded-full ${i === empStep ? 'bg-white/20' : 'bg-indigo-50 dark:bg-slate-700'} mr-1"><i class="fa-solid ${sectionIcon(x[0])}"></i></span>${x[0]}</button>`).join('');
+            let helper = g[0] === 'ADDRESS' ? `<div class="md:col-span-3 smart-check rounded-3xl p-4 flex flex-wrap items-center justify-between gap-3"><label class="inline-flex items-center gap-3 font-black text-sm"><input id="same-address" type="checkbox" onchange="copyCurrentToPermanent(true)" class="h-5 w-5 accent-indigo-600"> Permanent address same as current address</label><span class="text-xs text-slate-500 dark:text-slate-300"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i>Tick to copy Current Address fields into Permanent Address instantly.</span></div>` : '';
+            let salaryTip = g[0] === 'SALARY' ? `<div class="md:col-span-3 emp-section-note rounded-3xl p-4 text-sm"><b><i class="fa-solid fa-calculator text-indigo-600 mr-2"></i>Total Gross is automatic.</b><span class="text-slate-500 dark:text-slate-300 ml-2">Basic + Conveyance + HRA + Education All + Performance All + Medical All.</span></div>` : '';
+            let fields = g[1].map(i => { let long = EMP_COLS[i].length > 28 ? 'md:col-span-2' : ''; let readonly = i === GROSS_IDX ? 'readonly' : ''; let roClass = i === GROSS_IDX ? 'bg-emerald-50 dark:bg-emerald-900/20 font-black text-emerald-700 dark:text-emerald-300' : ''; return `<label class="field-card text-xs text-slate-500 ${long}"><span class="font-black field-label flex items-start gap-2"><i class="fa-solid ${fieldIcon(i)} text-indigo-500 mt-0.5"></i><span>${EMP_COLS[i]}</span></span><input data-i="${i}" value="${E(empDraft[i])}" ${readonly} oninput="empFieldInput(this)" class="entry-field mt-2 w-full p-2.5 rounded-2xl uppercase ${roClass}"></label>`; }).join('');
+            document.getElementById('emp-form').innerHTML = `<input type=hidden id=emp-id value="${editEmpId || ''}"><div class="md:col-span-3 emp-section-note rounded-3xl p-4 flex items-center justify-between gap-3"><div><p class="text-xs font-black text-indigo-600 dark:text-indigo-300 uppercase tracking-widest">Step ${empStep + 1} of ${GROUPS.length}</p><h3 class="text-xl font-black"><i class="fa-solid ${sectionIcon(g[0])} mr-2"></i>${g[0]} Details</h3></div><span class="chip bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200">${g[1].length} Fields</span></div>${helper}${salaryTip}${fields}<div class="md:col-span-3 sticky bottom-0 glass py-3 px-2 rounded-3xl flex justify-between items-center border dark:border-slate-700"><button type=button onclick="empGo(empStep-1)" class="btn btn-s"><i class="fa-solid fa-arrow-left"></i>Previous</button><div class="flex gap-2"><button type=button onclick="empGo(empStep+1)" class="btn btn-s">Next<i class="fa-solid fa-arrow-right"></i></button><button class="btn btn-i"><i class="fa-solid fa-floppy-disk"></i>Save</button></div></div>`;
+            if (g[0] === 'ADDRESS') { let same = LOCAL_ADDR_IDX.every((src, pos) => (empDraft[src] || '') === (empDraft[PERM_ADDR_IDX[pos]] || '') && (empDraft[src] || '') !== ''); let cb = document.getElementById('same-address'); if (cb) cb.checked = same; }
+        }
+        async function saveEmp(ev) {
+            ev.preventDefault();
+            captureEmpForm(); syncFather(PERSONAL_FATHER_IDX); calcGross();
+            let id = document.getElementById('emp-id').value || editEmpId || 'e_' + Date.now();
+            let old = employees.find(e => e.id === id);
+            let rec = se({ id, cols: [...empDraft], status: old?.status || 'active', exitDate: old?.exitDate || '' });
+            let k = employees.findIndex(e => e.id === id);
+            if (k >= 0) employees[k] = rec; else employees.push(rec);
+            editEmpId = id; empDraft = [...rec.cols]; save(); renderAll(); toast('EMPLOYEE MASTER SAVED')
+        }
+        function cardColorClass(color) {
+            return ({ green: 'bg-emerald-50 dark:bg-emerald-900/30 border-emerald-300 dark:border-emerald-700', blue: 'bg-blue-50 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700', red: 'bg-red-50 dark:bg-red-900/30 border-red-300 dark:border-red-700', yellow: 'bg-amber-50 dark:bg-amber-900/30 border-amber-300 dark:border-amber-700', purple: 'bg-purple-50 dark:bg-purple-900/30 border-purple-300 dark:border-purple-700' })[color || ''] || '';
+        }
+        function selectedColorClass(color) {
+            return ({ green: 'bg-emerald-500', blue: 'bg-blue-500', red: 'bg-red-500', yellow: 'bg-amber-400', purple: 'bg-purple-500' })[color || ''] || 'bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-500';
+        }
+        function colorDot(id, color, label, cls) { return `<button title="${label}" onclick="setCardColor('${id}','${color}')" class="h-6 w-6 rounded-full border-2 border-white shadow ${cls}"></button>` }
+        function cardColorButtons(i) {
+            return `<div class="relative group shrink-0 pr-3 mr-3 border-r dark:border-slate-600"><button title="Choose card colour" class="h-8 w-8 rounded-full border-2 shadow ${selectedColorClass(i.cardColor)}"></button><div class="hidden group-hover:flex hover:flex absolute left-10 top-0 z-20 flex-col gap-2 p-2 rounded-2xl bg-white dark:bg-slate-800 border dark:border-slate-600 shadow-xl">${colorDot(i.id,'green','Green','bg-emerald-500')}${colorDot(i.id,'blue','Blue','bg-blue-500')}${colorDot(i.id,'red','Red','bg-red-500')}${colorDot(i.id,'yellow','Yellow','bg-amber-400')}${colorDot(i.id,'purple','Purple','bg-purple-500')}<button title="Clear" onclick="setCardColor('${i.id}','')" class="h-6 w-6 rounded-full bg-slate-100 dark:bg-slate-700 text-[10px] font-black shadow">X</button></div></div>`
+        }
+        function setCardColor(id, color) { let i = interviews.find(x => x.id === id); if (!i) return; i.cardColor = color; save(); fillIntFilterOptions(); renderInt(); toast(color ? 'CARD COLOUR UPDATED' : 'CARD COLOUR CLEARED') }
+        function fillIntFilterOptions() {
+            let dept = document.getElementById('int-filter-dept'); if (!dept) return;
+            let cur = dept.value;
+            let vals = [...new Set(interviews.map(i => C(i, II.dept)).filter(Boolean))].sort();
+            dept.innerHTML = '<option value="">ALL DEPARTMENTS</option>' + vals.map(v => `<option value="${E(v)}">${v}</option>`).join('');
+            dept.value = vals.includes(cur) ? cur : '';
+        }
+        function clearIntFilters() {
+            ['int-filter-dept', 'int-filter-color', 'int-filter-status'].forEach(id => { let x = document.getElementById(id); if (x) x.value = ''; });
+            ['int-filter-hr', 'int-filter-exp', 'int-search'].forEach(id => { let x = document.getElementById(id); if (x) x.value = ''; });
+            renderInt();
+        }
+        function renderInt() {
+            fillIntFilterOptions();
+            let q = U(document.getElementById('int-search')?.value || '');
+            let fDept = U(document.getElementById('int-filter-dept')?.value || '');
+            let fColor = document.getElementById('int-filter-color')?.value || '';
+            let fHr = U(document.getElementById('int-filter-hr')?.value || '');
+            let fExp = U(document.getElementById('int-filter-exp')?.value || '');
+            let fStatus = U(document.getElementById('int-filter-status')?.value || '');
+            let rows = interviews.filter(i => {
+                let color = i.cardColor || '';
+                return (!q || i.cols.join(' ').includes(q)) && (!fDept || C(i, II.dept) === fDept) && (!fColor || (fColor === 'none' ? color === '' : color === fColor)) && (!fHr || C(i, 12).includes(fHr)) && (!fExp || C(i, 7).includes(fExp)) && (!fStatus || C(i, II.status) === fStatus);
+            });
+            let reversedRows = [...rows].reverse();
+            document.getElementById('int-stack').innerHTML = reversedRows.length ? reversedRows.map(i => `<div class="stack-card ${cardColorClass(i.cardColor)}"><div class="flex items-start">${cardColorButtons(i)}<div class="flex-1 min-w-0"><div class="flex justify-between gap-2 mb-3"><label><input class=int-check type=checkbox value="${i.id}"> <b>${C(i, II.name) || 'CANDIDATE'}</b></label><div><button onclick="openInt('${i.id}')" class=text-indigo-500><i class="fa-solid fa-pen"></i></button> <button onclick="del('int','${i.id}')" class=text-red-500><i class="fa-solid fa-trash-can"></i></button></div></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">${INT_COLS.map((c, x) => `<div><span class="text-slate-400 font-bold">${c}: </span><span>${C(i, x)}</span></div>`).join('')}</div></div></div></div>`).join('') : '<p class="p-8 text-center text-slate-400">NO INTERVIEWS MATCH FILTERS</p>'
+        }
+
+        function openInt(id) {
+            let r = id ? interviews.find(i => i.id === id) : null, arr = r?.cols ? [...r.cols] : Array(INT_COLS.length).fill('');
+            document.getElementById('int-form').innerHTML = `<input type=hidden id=int-id value="${id || ''}">` + INT_COLS.map((c, i) => `<label class="text-xs text-slate-500 ${c.length > 22 ? 'md:col-span-2' : ''}"><b>${c}</b><input data-i="${i}" value="${E(arr[i])}" oninput="this.value=this.value.toUpperCase()" class="mt-1 w-full p-2 rounded-xl border dark:bg-slate-700 dark:border-slate-600 uppercase"></label>`).join('') + `<div class="md:col-span-3 text-right"><button type=button onclick="closeInt()" class="btn btn-s">Cancel</button> <button class="btn btn-e">Save</button></div>`;
+            let intModal = document.getElementById('int-modal');
+            intModal.classList.remove('hidden');
+            intModal.classList.add('flex')
+        }
+
+        function closeInt() {
+            let intModal = document.getElementById('int-modal');
+            intModal.classList.add('hidden');
+            intModal.classList.remove('flex')
+        }
+
+        function saveInt(ev) {
+            ev.preventDefault();
+            let id = document.getElementById('int-id').value || 'i_' + Date.now(), arr = Array(INT_COLS.length).fill('');
+            document.querySelectorAll('#int-form [data-i]').forEach(x => arr[+x.dataset.i] = V(x.value, INT_COLS, +x.dataset.i));
+            let k = interviews.findIndex(i => i.id === id);
+            let old = k >= 0 ? interviews[k] : null;
+            let rec = si({ id, cols: arr, cardColor: old?.cardColor || '' });
+            if (k >= 0) interviews[k] = rec;
+            else interviews.push(rec);
+            save();
+            closeInt();
+            renderAll();
+            toast('INTERVIEW SAVED')
+        }
+
+        const CANDIDATE_FORM_MAP = [
+            ['Candidate Full Name', 3, 'Text', 'Yes', 'Employee name as per documents'],
+            ["Father's / Husband's Name", 4, 'Text', 'Yes', 'Will also sync to Family Details after import'],
+            ['Date of Birth DD/MM/YYYY', 5, 'Text', 'Yes', 'Use DD/MM/YYYY format'],
+            ['Gender', 7, 'Choice', 'Yes', 'MALE / FEMALE / OTHER'],
+            ['Marital Status', 8, 'Choice', 'Yes', 'SINGLE / MARRIED'],
+            ['Mobile Number', 35, 'Text', 'Yes', '10 digit mobile number'],
+            ['Religion', 42, 'Text', 'No', ''],
+            ['Place of Birth', 43, 'Text', 'No', ''],
+            ['Height CM', 44, 'Text', 'No', ''],
+            ['Identification Marks', 45, 'Text', 'No', ''],
+            ['Educational Qualification', 46, 'Text', 'No', ''],
+            ['Technical Qualification', 47, 'Text', 'No', ''],
+            ['Contact Number of Employee', 49, 'Text', 'No', 'Alternate contact if any'],
+            ['Aadhar Card No', 96, 'Text', 'Yes', ''],
+            ['PAN Card No', 97, 'Text', 'No', ''],
+            ['Passport No', 98, 'Text', 'No', ''],
+            ['Current Address 1 - House/Flat/Building/Village', 9, 'Text', 'Yes', ''],
+            ['Current Address 2 - Road/Street/Post Office', 10, 'Text', 'No', ''],
+            ['Current Address 3 - Area/Locality/Taluka', 11, 'Text', 'No', ''],
+            ['Current Address 4 - Town/City/District', 12, 'Text', 'Yes', ''],
+            ['Current Address 5 - Pin Code', 13, 'Text', 'Yes', ''],
+            ['Current Address 6 - State', 14, 'Text', 'Yes', ''],
+            ['Permanent Address Same as Current', -1, 'Choice', 'Yes', 'YES / NO'],
+            ['Permanent Address 1 - House/Flat/Building/Village', 15, 'Text', 'No', 'Required if answer is NO'],
+            ['Permanent Address 2 - Road/Street/Post Office', 16, 'Text', 'No', ''],
+            ['Permanent Address 3 - Area/Locality/Taluka', 17, 'Text', 'No', ''],
+            ['Permanent Address 4 - Town/City/District', 18, 'Text', 'No', ''],
+            ['Permanent Address 5 - Pin Code', 19, 'Text', 'No', ''],
+            ['Permanent Address 6 - State', 20, 'Text', 'No', ''],
+            ['Nominee 1 Name', 23, 'Text', 'No', ''],
+            ['Nominee 1 Relation', 24, 'Text', 'No', ''],
+            ['Nominee 1 Age', 25, 'Text', 'No', ''],
+            ['Nominee 1 Percentage', 26, 'Text', 'No', ''],
+            ['Mother Name', 27, 'Text', 'No', ''],
+            ['Mother Relation', 28, 'Text', 'No', ''],
+            ['Previous Employer Name', 51, 'Text', 'No', ''],
+            ['Previous Employer Address', 52, 'Text', 'No', ''],
+            ['Previous Designation', 53, 'Text', 'No', ''],
+            ['Previous Department', 54, 'Text', 'No', ''],
+            ['From Period', 55, 'Text', 'No', ''],
+            ['To Period', 56, 'Text', 'No', ''],
+            ['Previous Wages/Salary', 57, 'Text', 'No', ''],
+            ['Reason of Leaving', 56, 'Text', 'No', ''],
+            ['Reference Person Name 1', 31, 'Text', 'No', ''],
+            ['Reference Department Name', 32, 'Text', 'No', ''],
+            ['Background Name 1', 36, 'Text', 'No', ''],
+            ['Background Mobile Number 1', 37, 'Text', 'No', ''],
+            ['Background Relation/Post 1', 38, 'Text', 'No', ''],
+            ['Background Name 2', 39, 'Text', 'No', ''],
+            ['Background Mobile Number 2', 40, 'Text', 'No', ''],
+            ['Background Relation/Post 2', 41, 'Text', 'No', ''],
+            ['Witness Contact Number', 87, 'Text', 'No', ''],
+            ['Witness 2 Address', 88, 'Text', 'No', ''],
+            ['Bank Account Open', 89, 'Choice', 'No', 'YES / NO']
+        ];
+        function exportCandidateWordTemplate() {
+            let sections = [
+                ['Personal Details', ['Candidate Full Name', "Father\'s / Husband\'s Name", 'Date of Birth DD/MM/YYYY', 'Gender|MALE|FEMALE|OTHER', 'Marital Status|SINGLE|MARRIED', 'Mobile Number', 'Religion', 'Place of Birth', 'Height CM', 'Identification Marks', 'Educational Qualification', 'Technical Qualification', 'Contact Number of Employee', 'Aadhar Card No', 'PAN Card No', 'Passport No']],
+                ['Current Address', ['Current Address 1 - House/Flat/Building/Village', 'Current Address 2 - Road/Street/Post Office', 'Current Address 3 - Area/Locality/Taluka', 'Current Address 4 - Town/City/District', 'Current Address 5 - Pin Code', 'Current Address 6 - State']],
+                ['Permanent Address', ['Permanent Address Same as Current|YES|NO', 'Permanent Address 1 - House/Flat/Building/Village', 'Permanent Address 2 - Road/Street/Post Office', 'Permanent Address 3 - Area/Locality/Taluka', 'Permanent Address 4 - Town/City/District', 'Permanent Address 5 - Pin Code', 'Permanent Address 6 - State']],
+                ['Family and Nominee Details', ['Nominee 1 Name', 'Nominee 1 Relation', 'Nominee 1 Age', 'Nominee 1 Percentage', 'Mother Name', 'Mother Relation']],
+                ['Previous Employment Details', ['Previous Employer Name', 'Previous Employer Address', 'Previous Designation', 'Previous Department', 'From Period', 'To Period', 'Previous Wages/Salary', 'Reason of Leaving']],
+                ['Reference and Background Details', ['Reference Person Name 1', 'Reference Department Name', 'Background Name 1', 'Background Mobile Number 1', 'Background Relation/Post 1', 'Background Name 2', 'Background Mobile Number 2', 'Background Relation/Post 2']],
+                ['Witness and Bank Details', ['Witness Contact Number', 'Witness 2 Address', 'Bank Account Open|YES|NO']]
+            ];
+            let q = 1;
+            let body = `<html><head><meta charset="utf-8"><title>HRPro Candidate Form</title><style>body{font-family:Calibri,Arial,sans-serif;color:#0f172a}h1{color:#4f46e5}h2{color:#4338ca;border-bottom:1px solid #cbd5e1;padding-bottom:4px;margin-top:18px}.note{background:#eef2ff;border:1px solid #c7d2fe;padding:12px;border-radius:10px}p.q{font-weight:bold;margin:10px 0 2px}.opt{margin-left:22px}.small{color:#475569;font-size:12px}</style></head><body><h1>HRPro Candidate Personal Data Form</h1><div class="note"><b>Purpose:</b> Upload this Word file in Microsoft Forms Quick Import to create the candidate personal data form. Salary fields are intentionally excluded and will be filled by HR inside HRPro.</div><p class="small">Important: Keep question titles unchanged so HRPro can map Microsoft Forms Excel responses correctly.</p>`;
+            sections.forEach(sec => {
+                body += `<h2>${sec[0]}</h2>`;
+                sec[1].forEach(item => {
+                    let parts = item.split('|');
+                    body += `<p class="q">${q}. ${parts[0]}</p>`;
+                    if (parts.length > 1) parts.slice(1).forEach(o => body += `<p class="opt">${o}</p>`);
+                    q++;
+                });
+            });
+            body += `<hr><p class="small"><b>HR Note:</b> After responses are submitted, download/open the Microsoft Forms response workbook and import it into HRPro using Import Form Export. Salary details should be completed manually by HR in the Employee Master.</p></body></html>`;
+            blob(body, 'HRPro_Candidate_Microsoft_Form_Import_Template.doc', 'application/msword');
+            toast('WORD TEMPLATE DOWNLOADED')
+        }
+        function importCandidateFormExport(ev) {
+            let f = ev.target.files[0];
+            if (!f) return;
+            let r = new FileReader();
+            r.onload = e => {
+                let wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+                let aoa = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: '' });
+                if (!aoa.length) return toast('EMPTY FORM EXPORT');
+                let header = aoa[0].map(N);
+                let rows = aoa.slice(1).filter(row => !row.every(v => U(v) === ''));
+                let added = 0, updated = 0;
+                rows.forEach(row => {
+                    let arr = Array(EMP_COLS.length).fill('');
+                    CANDIDATE_FORM_MAP.forEach(m => {
+                        if (m[1] < 0) return;
+                        let pos = header.findIndex(h => h === N(m[0]));
+                        if (pos >= 0) arr[m[1]] = V(row[pos], EMP_COLS, m[1]);
+                    });
+                    let samePos = header.findIndex(h => h === N('Permanent Address Same as Current'));
+                    if (samePos >= 0 && ['YES', 'Y', 'TRUE', 'SAME'].includes(U(row[samePos]))) {
+                        [9,10,11,12,13,14].forEach((src, ix) => arr[[15,16,17,18,19,20][ix]] = arr[src]);
+                    }
+                    if (arr[4] && !arr[75]) arr[75] = arr[4];
+                    if (arr[75] && !arr[4]) arr[4] = arr[75];
+                    let rec = se({ id: 'e_' + Date.now() + Math.random(), cols: arr, status: 'active' });
+                    let keyAadhar = C(rec, 96), keyPan = C(rec, 97), keyMobile = C(rec, 35), keyName = C(rec, EI.name);
+                    let k = employees.findIndex(x => (keyAadhar && C(x, 96) === keyAadhar) || (keyPan && C(x, 97) === keyPan) || (keyMobile && C(x, 35) === keyMobile && keyName && C(x, EI.name) === keyName));
+                    if (k >= 0) {
+                        rec.id = employees[k].id;
+                        rec.status = employees[k].status || 'active';
+                        rec.exitDate = employees[k].exitDate || '';
+                        employees[k] = rec;
+                        updated++;
+                    } else {
+                        employees.push(rec);
+                        added++;
+                    }
+                });
+                save();
+                renderAll();
+                toast(`FORM IMPORTED: ${added} NEW, ${updated} UPDATED. HR CAN FILL SALARY DETAILS.`)
+            };
+            r.readAsArrayBuffer(f);
+            ev.target.value = ''
+        }
+        function mapCols(cols, row) {
+            let h = row.map(N), m = cols.map(c => h.findIndex(x => x === N(c))), found = m.filter(i => i > -1).length;
+            return { m, has: found > 0, found }
+        }
+
+        function startImport(ev, type) {
+            let f = ev.target.files[0];
+            if (!f) return;
+            let r = new FileReader();
+            r.onload = e => {
+                let wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+                let aoa = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: '' });
+                let cols = type === 'emp' ? EMP_COLS : INT_COLS;
+                let meta = mapCols(cols, aoa[0] || []);
+                let map = meta.has ? meta.m : cols.map((_, i) => i);
+                let rows = (meta.has ? aoa.slice(1) : aoa).filter(row => !row.every(v => U(v) === ''));
+                let store = type === 'emp' ? employees : interviews;
+                let sync = type === 'emp' ? se : si;
+                
+                let buf = rows.map(row => {
+                    let arr = Array(cols.length).fill('');
+                    map.forEach((src, i) => { if (src >= 0) arr[i] = V(row[src], cols, i) });
+                    let rec = sync({ id: (type === 'emp' ? 'e_' : 'i_') + Date.now() + Math.random(), cols: arr });
+                    let key = type === 'emp' ? (C(rec, EI.emp) || C(rec, EI.punch)) : ((C(rec, II.sr) || '') + '|' + (C(rec, II.name) || ''));
+                    let dup = store.some(x => type === 'emp' ? key && (C(x, EI.emp) === key || C(x, EI.punch) === key) : key !== '|' && ((C(x, II.sr) || '') + '|' + (C(x, II.name) || '')) === key);
+                    return { rec, dup, key }
+                });
+                pendingImport = { type, buf };
+                showImport(meta)
+            };
+            r.readAsArrayBuffer(f);
+            ev.target.value = ''
+        }
+
+        function showImport(meta) {
+            document.getElementById('import-title').innerText = `Review Import - ${pendingImport.type === 'emp' ? 'Employees' : 'Interviews'} (${meta.found} columns matched)`;
+            document.getElementById('import-body').innerHTML = `<div class="mb-2 text-xs text-slate-500">Select which transactions to import. Duplicates are marked.</div><table class="w-full text-left text-xs"><thead class="bg-slate-50 dark:bg-slate-900/40"><tr><th class=p-2><input type=checkbox checked onchange="toggleAll('.imp-check',this.checked)"></th><th class=p-2>Key / Name</th><th class=p-2>Status</th></tr></thead><tbody>${pendingImport.buf.map((x, i) => `<tr class="border-t dark:border-slate-700 ${x.dup ? 'bg-amber-50 dark:bg-amber-900/20' : ''}"><td class=p-2><input class=imp-check type=checkbox value="${i}" checked></td><td class=p-2>${pendingImport.type === 'emp' ? C(x.rec, EI.name) : C(x.rec, II.name)}</td><td class=p-2>${x.dup ? '<span class="chip bg-amber-100 text-amber-700">DUPLICATE UPDATE</span>' : '<span class="chip bg-emerald-100 text-emerald-700">NEW</span>'}</td></tr>`).join('')}</tbody></table>`;
+            let importModal = document.getElementById('import-modal');
+            importModal.classList.remove('hidden');
+            importModal.classList.add('flex')
+        }
+
+        function closeImport() {
+            let importModal = document.getElementById('import-modal');
+            importModal.classList.add('hidden');
+            importModal.classList.remove('flex');
+            pendingImport = null
+        }
+
+        function confirmImport() {
+            if (!pendingImport) return;
+            let type = pendingImport.type, store = type === 'emp' ? employees : interviews, upd = 0, add = 0;
+            selectedIds('.imp-check').forEach(idx => {
+                let rec = pendingImport.buf[+idx].rec;
+                let key = type === 'emp' ? (C(rec, EI.emp) || C(rec, EI.punch)) : ((C(rec, II.sr) || '') + '|' + (C(rec, II.name) || ''));
+                let k = store.findIndex(x => type === 'emp' ? key && (C(x, EI.emp) === key || C(x, EI.punch) === key) : key !== '|' && ((C(x, II.sr) || '') + '|' + (C(x, II.name) || '')) === key);
+                if (k >= 0) {
+                    rec.id = store[k].id;
+                    store[k] = rec;
+                    upd++
+                } else {
+                    store.push(rec);
+                    add++
+                }
+            });
+            save();
+            closeImport();
+            renderAll();
+            toast(`IMPORTED ${add} NEW, ${upd} UPDATED`)
+        }
+
+        function selectedIds(sel) { return [...document.querySelectorAll(sel + ':checked')].map(x => x.value) }
+        function toggleAll(sel, ch) { document.querySelectorAll(sel).forEach(x => x.checked = ch) }
+        
+        async function del(type, id) {
+            let store = type === 'emp' ? employees : interviews, k = store.findIndex(x => x.id === id);
+            if (k < 0) return;
+            trash.unshift({ trashId: 't_' + Date.now() + Math.random(), kind: type, data: store.splice(k, 1)[0], deletedAt: new Date().toISOString() });
+            save();
+            renderAll();
+            toast('MOVED TO RECYCLE BIN')
+        }
+
+        function bulkDelete(type) {
+            let list = type === 'emp' ? selectedIds('.emp-check') : selectedIds('.int-check');
+            if (!list.length) return toast('SELECT ROWS FIRST');
+            
+            let store = type === 'emp' ? employees : interviews;
+            list.forEach(id => {
+                let k = store.findIndex(x => x.id === id);
+                if (k >= 0) trash.unshift({ trashId: 't_' + Date.now() + Math.random(), kind: type, data: store.splice(k, 1)[0], deletedAt: new Date().toISOString() })
+            })
+            
+            save();
+            renderAll();
+            toast('SELECTED MOVED TO RECYCLE BIN')
+        }
+
+        function exportSelectedOrAll(type, selectedOnly) {
+            let list = selectedOnly ? (type === 'emp' ? selectedIds('.emp-check') : selectedIds('.int-check')) : [];
+            let store = type === 'emp' ? employees : interviews;
+            if (selectedOnly && !list.length) return toast('SELECT ROWS FIRST');
+            exportExcel(type, selectedOnly ? store.filter(x => list.includes(x.id)) : store)
+        }
+
+        function exportExcel(type, store) {
+            let cols = type === 'emp' ? EMP_COLS : INT_COLS;
+            let aoa = [cols, ...store.map(r => cols.map((_, i) => C(r, i)))];
+            let ws = XLSX.utils.aoa_to_sheet(aoa);
+            let wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, type === 'emp' ? 'EMPLOYEE MASTER' : 'INTERVIEW TRACKER');
+            XLSX.writeFile(wb, (type === 'emp' ? 'EMPLOYEE' : 'INTERVIEW') + '_EXPORT_' + Date.now() + '.xlsx')
+        }
+
+        function bulkStatus() {
+            let st = U(document.getElementById('bulk-status').value), list = selectedIds('.int-check');
+            if (!st || !list.length) return toast('SELECT STATUS AND ROWS');
+            interviews.forEach(i => { if (list.includes(i.id)) i.cols[II.status] = st });
+            save();
+            renderAll();
+            toast('STATUS UPDATED')
+        }
+
+        function emailReport(allSelected) {
+            let ids = selectedIds('.int-check');
+            let list = ids.length ? interviews.filter(i => ids.includes(i.id)) : interviews.filter(i => C(i, II.status) === 'SELECTED');
+            if (!list.length) return toast('NO SELECTED CANDIDATES');
+            let header = INT_COLS.join(' | '), rows = list.map(i => INT_COLS.map((c, x) => C(i, x)).join(' | ')).join('\n');
+            location.href = 'mailto:?subject=' + encodeURIComponent('SELECTED CANDIDATES REPORT') + '&body=' + encodeURIComponent('Dear Sir,\n\nSelected candidates report:\n\n' + header + '\n' + rows + '\n\nRegards,\nHR')
+        }
+
+        function mailBirthdayReport() {
+            let ids = selectedIds('.bday-check'), base = birthdayCategory ? birthdays().filter(e => C(e, 58) === birthdayCategory) : birthdays(), list = ids.length ? employees.filter(e => ids.includes(e.id)) : base;
+            if (!list.length) return toast('NO BIRTHDAYS SELECTED');
+            let rows = list.map(e => `${C(e, EI.name)} | ${C(e, EI.dept)} | ${C(e, EI.dob)}`).join('\n');
+            location.href = 'mailto:?subject=' + encodeURIComponent('BIRTHDAY LIST') + '&body=' + encodeURIComponent('Dear Team,\n\nBirthday list:\n\n' + rows + '\n\nBest Wishes from\nFAZE THREE AUTOFAB LTD.')
+        }
+
+        function mailConfirmationReport() {
+            setDashActions('confirmed');
+            let list = confirmed();
+            if (!list.length) return toast('NO CONFIRMATIONS THIS MONTH');
+            let rows = list.map(e => { let b = confirmationBucket(e); return `${C(e, EI.name)} | ${C(e, EI.dept)} | ${C(e, EI.desig)} | ${C(e, EI.conf)} | ${b ? b.label : ''}` }).join('\n');
+            location.href = 'mailto:?subject=' + encodeURIComponent('CONFIRMATION LIST') + '&body=' + encodeURIComponent('Dear Team,\n\nConfirmation list for this month and next month:\n\nEmployee | Department | Designation | Confirmation Date | Confirmation Month\n' + rows + '\n\nRegards,\nHR')
+        }
+        function openReminder() {
+            reminderInterviewIds = selectedIds('.int-check');
+            if (!reminderInterviewIds.length) return toast('SELECT INTERVIEW ROWS FIRST');
+            let selected = interviews.filter(i => reminderInterviewIds.includes(i.id));
+            document.getElementById('reminder-summary').innerText = selected.length + ' interview(s): ' + selected.map(i => C(i, II.name)).join(', ');
+            let now = new Date(Date.now() + 3600000);
+            document.getElementById('reminder-date').value = now.toISOString().slice(0, 10);
+            document.getElementById('reminder-time').value = now.toTimeString().slice(0, 5);
+            document.getElementById('reminder-message').value = 'INTERVIEW REMINDER';
+            let m = document.getElementById('reminder-modal'); m.classList.remove('hidden'); m.classList.add('flex');
+        }
+        function closeReminder() { let m = document.getElementById('reminder-modal'); m.classList.add('hidden'); m.classList.remove('flex'); }
+        async function saveReminder(ev) {
+            ev.preventDefault();
+            let date = document.getElementById('reminder-date').value, time = document.getElementById('reminder-time').value;
+            let when = new Date(date + 'T' + time);
+            if (!Number.isFinite(when.getTime()) || when <= new Date()) return toast('SELECT A FUTURE DATE AND TIME');
+            let names = interviews.filter(i => reminderInterviewIds.includes(i.id)).map(i => C(i, II.name)).join(', ');
+            reminders.push({ id: 'r_' + Date.now(), interviewIds: [...reminderInterviewIds], when: when.toISOString(), message: U(document.getElementById('reminder-message').value) || 'INTERVIEW REMINDER', names, fired: false });
+            save(); scheduleAllReminders(); closeReminder(); toast('REMINDER SAVED FOR ' + when.toLocaleString());
+            if ('Notification' in window && Notification.permission === 'default') { try { await Notification.requestPermission(); } catch {} }
+        }
+        function scheduleAllReminders() {
+            reminders.filter(r => !r.fired).forEach(r => {
+                let delay = new Date(r.when).getTime() - Date.now();
+                if (delay <= 0) { fireReminder(r.id); return; }
+                if (delay <= 2147483647 && !r.timerSet) { r.timerSet = true; setTimeout(() => fireReminder(r.id), delay); }
+            });
+        }
+        function fireReminder(id) {
+            let r = reminders.find(x => x.id === id);
+            if (!r || r.fired) return;
+            r.fired = true; save();
+            let text = r.message + (r.names ? ': ' + r.names : '');
+            if ('Notification' in window && Notification.permission === 'granted') new Notification('HRPro Reminder', { body: text });
+            alert('HRPRO REMINDER\n\n' + text);
+        }
+        function mailBday(id) {
+            let e = employees.find(x => x.id === id);
+            location.href = 'mailto:?subject=' + encodeURIComponent('HAPPY BIRTHDAY ' + C(e, EI.name)) + '&body=' + encodeURIComponent('Dear ' + C(e, EI.name) + '\n\nWishing you a very Happy Birthday!\n\nBest Wishes from\nFAZE THREE AUTOFAB LTD.')
+        }
+
+        function emlBday(id) {
+            let e = employees.find(x => x.id === id), name = C(e, EI.name), dept = C(e, EI.dept);
+            let body = `<html><body style="font-family:Calibri,Arial;text-align:center;color:#203864"><div style="max-width:640px;margin:auto;border:1px solid #d9e2f3;padding:24px"><div style="font-size:64px">🎂</div><h1 style="color:#548DD4">Happy Birthday</h1><p>Mr. <b>${name}</b></p><p><b><i>${dept}</i></b></p><p style="color:#00B050;font-style:italic">Best Wishes from</p><p style="color:#548DD4;font-weight:bold">FAZE THREE AUTOFAB LTD.</p></div></body></html>`;
+            
+            blob(`Subject: HAPPY BIRTHDAY ${name}\nMIME-Version: 1.0\nContent-Type: text/html; charset=UTF-8\n\n${body}`, 'HAPPY_BIRTHDAY_' + name + '.eml', 'message/rfc822')
+        }
+
+        function blob(data, name, type) {
+            let a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([data], { type }));
+            a.download = name;
+            a.click()
+        }
+
+        function openTrash() {
+            let trashModal = document.getElementById('trash-modal');
+            if (trashModal.classList.contains('hidden')) {
+                renderTrash();
+                trashModal.classList.remove('hidden');
+                trashModal.classList.add('flex')
+            } else {
+                trashModal.classList.add('hidden');
+                trashModal.classList.remove('flex')
+            }
+        }
+
+        function tname(t) {
+            if (t.kind === 'emp') return C(t.data, EI.name) || 'EMPLOYEE';
+            if (t.kind === 'int') return C(t.data, II.name) || 'INTERVIEW';
+            return t.kind
+        }
+
+        function renderTrash() {
+            document.getElementById('trash-list').innerHTML = trash.length ? trash.map(t => `<div class="flex justify-between p-3 bg-slate-50 dark:bg-slate-700 rounded-2xl border dark:border-slate-600 mb-2"><div><b>${t.kind.toUpperCase()} - ${tname(t)}</b><div class="text-[10px] text-slate-400">${t.deletedAt}</div></div><div><button onclick="restoreTrash('${t.trashId}')" class="btn bg-emerald-100 text-emerald-700">Restore</button> <button onclick="hardDelete('${t.trashId}')" class="btn btn-r">Delete</button></div></div>`).join('') : '<p class="text-center text-slate-400 py-8">RECYCLE BIN IS EMPTY.</p>'
+        }
+
+        function restoreTrash(id) {
+            let k = trash.findIndex(t => t.trashId === id);
+            if (k < 0) return;
+            let t = trash.splice(k, 1)[0];
+            if (t.kind === 'emp') employees.push(t.data);
+            if (t.kind === 'int') interviews.push(t.data);
+            save();
+            renderAll();
+            renderTrash()
+        }
+
+        function hardDelete(id) {
+            trash = trash.filter(t => t.trashId !== id);
+            save();
+            renderAll();
+            renderTrash()
+        }
+
+        function emptyTrash() {
+            if (confirm('Empty permanently?')) {
+                trash = [];
+                save();
+                renderAll();
+                renderTrash()
+            }
+        }
+
+        function updateTrash() {
+            let badge = document.getElementById('trash-badge');
+            if (!badge) return;
+            if (trash.length) {
+                badge.innerText = trash.length;
+                badge.classList.remove('hidden');
+                badge.classList.add('flex')
+            } else {
+                badge.classList.add('hidden');
+                badge.classList.remove('flex')
+            }
+        }
+
+        function autoBackupAvailable() {
+            return 'showDirectoryPicker' in window && 'indexedDB' in window;
+        }
+        function setAutoStatus(msg) {
+            let el = document.getElementById('auto-backup-status');
+            if (el) el.innerText = msg;
+        }
+        function openAutoIDB() {
+            return new Promise((resolve, reject) => {
+                let req = indexedDB.open(AUTO_IDB_NAME, 1);
+                req.onupgradeneeded = () => req.result.createObjectStore(AUTO_IDB_STORE);
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+        }
+        async function saveAutoDirHandle(handle) {
+            let db = await openAutoIDB();
+            return new Promise((resolve, reject) => {
+                let tx = db.transaction(AUTO_IDB_STORE, 'readwrite');
+                tx.objectStore(AUTO_IDB_STORE).put(handle, 'directory');
+                tx.oncomplete = resolve;
+                tx.onerror = () => reject(tx.error);
+            });
+        }
+        async function getAutoDirHandle() {
+            let db = await openAutoIDB();
+            return new Promise((resolve, reject) => {
+                let tx = db.transaction(AUTO_IDB_STORE, 'readonly');
+                let req = tx.objectStore(AUTO_IDB_STORE).get('directory');
+                req.onsuccess = () => resolve(req.result || null);
+                req.onerror = () => reject(req.error);
+            });
+        }
+        async function verifyAutoPermission(mode, ask) {
+            if (!autoDirHandle) return false;
+            let opts = { mode };
+            if ((await autoDirHandle.queryPermission(opts)) === 'granted') return true;
+            if (ask && (await autoDirHandle.requestPermission(opts)) === 'granted') return true;
+            return false;
+        }
+        async function getAutoBackupFileHandle(create, askPermission) {
+            if (!autoBackupAvailable()) {
+                setAutoStatus('Auto folder backup needs Chrome or Edge browser. Manual backup still works.');
+                return null;
+            }
+            if (!autoDirHandle) autoDirHandle = await getAutoDirHandle();
+            if (!autoDirHandle) {
+                setAutoStatus('Auto backup folder: not selected');
+                return null;
+            }
+            let ok = await verifyAutoPermission(create ? 'readwrite' : 'read', askPermission);
+            if (!ok) {
+                setAutoStatus('Auto backup folder selected, but permission is needed. Click Choose Auto Backup Folder.');
+                return null;
+            }
+            return await autoDirHandle.getFileHandle(AUTO_BACKUP_FILE, { create });
+        }
+        async function initAutoBackupFolder() {
+            if (!autoBackupAvailable()) {
+                setAutoStatus('Auto folder backup not supported in this browser. Use Chrome or Edge.');
+                return;
+            }
+            autoDirHandle = await getAutoDirHandle();
+            if (!autoDirHandle) {
+                setAutoStatus('Auto backup folder: not selected');
+                return;
+            }
+            if (await verifyAutoPermission('readwrite', false)) {
+                setAutoStatus('Auto backup folder ready. Restoring from ' + AUTO_BACKUP_FILE + '...');
+                await autoRestoreFromDefault(false);
+            } else {
+                setAutoStatus('Auto backup folder saved. Click Choose Auto Backup Folder once to allow access.');
+            }
+        }
+        async function chooseAutoBackupFolder() {
+            try {
+                if (!autoBackupAvailable()) return toast('USE CHROME OR EDGE FOR AUTO FOLDER BACKUP');
+                autoDirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+                await saveAutoDirHandle(autoDirHandle);
+                setAutoStatus('Auto backup folder selected. File: ' + AUTO_BACKUP_FILE);
+                await autoBackupNow(true);
+            } catch (e) {
+                console.warn(e);
+                toast('AUTO BACKUP FOLDER NOT SELECTED');
+            }
+        }
+        function scheduleAutoBackup() {
+            if (bootingFromBackup || !autoDirHandle) return;
+            clearTimeout(autoBackupTimer);
+            autoBackupTimer = setTimeout(() => autoBackupNow(false), 1200);
+        }
+        async function autoBackupNow(manual) {
+            try {
+                if (autoBackupBusy) return;
+                autoBackupBusy = true;
+                let fh = await getAutoBackupFileHandle(true, manual);
+                if (!fh) { autoBackupBusy = false; if (manual) toast('CHOOSE AUTO BACKUP FOLDER FIRST'); return; }
+                let writable = await fh.createWritable();
+                await writable.write(JSON.stringify(backupPayload(), null, 2));
+                await writable.close();
+                autoBackupBusy = false;
+                setAutoStatus('Last auto backup: ' + new Date().toLocaleString() + ' | ' + AUTO_BACKUP_FILE);
+                if (manual) toast('BACKUP SAVED TO DEFAULT FOLDER');
+            } catch (e) {
+                autoBackupBusy = false;
+                console.error(e);
+                setAutoStatus('Auto backup failed: ' + e.message);
+                if (manual) toast('AUTO BACKUP FAILED');
+            }
+        }
+        async function autoRestoreFromDefault(manual) {
+            try {
+                let fh = await getAutoBackupFileHandle(false, manual);
+                if (!fh) { if (manual) toast('CHOOSE AUTO BACKUP FOLDER FIRST'); return; }
+                let file = await fh.getFile();
+                let p = JSON.parse(await file.text());
+                applyBackupPayload(p);
+                localStorage.setItem(DB, JSON.stringify(currentState()));
+                applyTheme();
+                renderAll();
+                setAutoStatus('Restored from default backup: ' + (p.savedAt ? new Date(p.savedAt).toLocaleString() : AUTO_BACKUP_FILE));
+                if (manual) toast('RESTORED FROM DEFAULT FOLDER');
+            } catch (e) {
+                console.warn(e);
+                if (manual) toast('NO DEFAULT BACKUP FOUND');
+                setAutoStatus('Default restore not completed: ' + e.message);
+            }
+        }
+        async function saveAndCloseApp() {
+            await autoBackupNow(true);
+            toast('BACKUP SAVED. YOU CAN CLOSE THE APP NOW.');
+            setTimeout(() => { try { window.close(); } catch(e) {} }, 500);
+        }
+
+        function backup() {
+            blob(JSON.stringify({ employees, interviews, trash, reminders, settings, version: 'ultimate-v10-no-letters' }), 'HRPro_FULL_BACKUP_' + Date.now() + '.json', 'application/json');
+            toggleSide()
+        }
+
+        function restore(ev) {
+            let f = ev.target.files[0];
+            if (!f) return;
+            let r = new FileReader();
+            r.onload = e => {
+                let p = JSON.parse(e.target.result);
+                employees = p.employees || [];
+                interviews = p.interviews || [];
+                trash = p.trash || [];
+                reminders = p.reminders || [];
+                settings = { theme: 'light', ...(p.settings || {}) };
+                save();
+                applyTheme();
+                renderAll();
+                toast('FULL BACKUP RESTORED')
+            };
+            r.readAsText(f);
+            toggleSide()
+        }
+
+        window.addEventListener('pagehide', function(){
+            if (autoDirHandle) autoBackupNow(false);
+        });
+        document.addEventListener('visibilitychange', function(){
+            if (document.visibilityState === 'hidden' && autoDirHandle) autoBackupNow(false);
+        });
+        window.addEventListener('error', function(e){
+            console.error('HRPro runtime error:', e.message);
+            var splash = document.getElementById('splash');
+            if(splash) { splash.classList.add('hide'); }
+        });
+    </script>
+</body>
+</html>
