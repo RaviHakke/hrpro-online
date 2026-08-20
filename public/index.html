@@ -110,10 +110,36 @@
         .dark .master-table th:last-child, .dark .master-table td:last-child { background: #1e293b; }
         .master-table thead th:last-child { z-index: 9; background: #f8fafc; }
         .dark .master-table thead th:last-child { background: #0f172a; }
+
+        /* Secure pattern-lock overlay */
+        #pattern-lock-screen { user-select: none; -webkit-user-select: none; }
+        #pattern-lock-screen.unlocked { opacity: 0; visibility: hidden; pointer-events: none; }
+        #pattern-canvas { touch-action: none; width: min(78vw, 330px); height: min(78vw, 330px); }
+        .pattern-shake { animation: patternShake .32s ease-in-out; }
+        @keyframes patternShake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
     </style>
 </head>
 
 <body class="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950 text-slate-800 dark:text-slate-100 pb-16">
+
+    <div id="pattern-lock-screen" class="fixed inset-0 z-[9999] bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 flex items-center justify-center p-4 transition-all duration-300" role="dialog" aria-modal="true" aria-labelledby="pattern-lock-title">
+        <div id="pattern-lock-card" class="w-full max-w-md rounded-3xl border border-white/15 bg-white/10 backdrop-blur-xl shadow-2xl p-6 text-center text-white">
+            <div class="mx-auto mb-4 h-16 w-16 rounded-2xl bg-indigo-500/25 flex items-center justify-center">
+                <i id="pattern-lock-icon" class="fa-solid fa-shield-halved text-3xl text-indigo-300"></i>
+            </div>
+            <h1 id="pattern-lock-title" class="text-2xl font-black">HRPro Secure Access</h1>
+            <p id="pattern-lock-subtitle" class="mt-2 text-sm text-slate-300">Draw your pattern to unlock the app.</p>
+            <div class="mt-5 flex justify-center">
+                <canvas id="pattern-canvas" width="330" height="330" class="rounded-3xl bg-slate-950/45 border border-white/10 shadow-inner" aria-label="3 by 3 pattern grid"></canvas>
+            </div>
+            <p id="pattern-lock-message" class="mt-4 min-h-6 text-sm font-bold text-indigo-200" aria-live="polite"></p>
+            <div class="mt-3 flex justify-center gap-2">
+                <button id="pattern-clear-btn" type="button" class="btn bg-white/10 text-white hover:bg-white/20"><i class="fa-solid fa-rotate-left"></i> Clear</button>
+                <button id="pattern-cancel-setup-btn" type="button" class="hidden btn bg-red-500/20 text-red-200 hover:bg-red-500/30">Cancel change</button>
+            </div>
+            <p class="mt-4 text-[11px] leading-4 text-slate-400">Your pattern is verified locally using a salted PBKDF2 hash. It is never stored as plain text.</p>
+        </div>
+    </div>
     <div id="splash" class="fixed inset-0 z-[99] bg-gradient-to-br from-indigo-600 to-indigo-900 flex flex-col items-center justify-center text-white">
         <div class="bg-white p-6 rounded-3xl shadow-2xl mb-7">
             <i class="fa-solid fa-users-gear text-6xl text-indigo-600"></i>
@@ -191,6 +217,14 @@
                 <input type="file" accept=".json" class="hidden" onchange="restore(event)">
             </label>
             <hr class="dark:border-slate-700">
+
+            <hr class="dark:border-slate-700">
+            <div onclick="lockPatternApp('manual')" class="cursor-pointer">
+                <i class="fa-solid fa-lock text-indigo-500 mr-2"></i>Lock App Now
+            </div>
+            <div onclick="beginPatternChange()" class="cursor-pointer">
+                <i class="fa-solid fa-shield-halved text-amber-500 mr-2"></i>Change Pattern
+            </div>
             <label><input type="checkbox" id="dark" onchange="darkMode()"> Dark Mode</label>
         </div>
     </aside>
@@ -526,7 +560,197 @@
                 document.getElementById('splash').classList.add('hide')
             }
         }
-        document.addEventListener('DOMContentLoaded', boot);
+
+        // ===== Secure pattern lock =====
+        // Important: this protects the UI of this static app. The server must still enforce
+        // authentication and authorization on /api/data because client-side code can be inspected.
+        const PATTERN_KEY = 'HRPRO_PATTERN_V1';
+        const PATTERN_ATTEMPT_KEY = 'HRPRO_PATTERN_ATTEMPTS_V1';
+        const PATTERN_ITERATIONS = 150000;
+        const PATTERN_MIN_POINTS = 4;
+        const PATTERN_IDLE_MS = 5 * 60 * 1000;
+        const PATTERN_HIDDEN_LOCK_MS = 30 * 1000;
+        let patternBooted = false, patternUnlocked = false, patternDrawing = false;
+        let patternSequence = [], patternConfirm = null, patternMode = 'unlock';
+        let patternIdleTimer = null, patternHiddenAt = 0;
+        const patternPoints = [
+            {id:1,x:55,y:55},{id:2,x:165,y:55},{id:3,x:275,y:55},
+            {id:4,x:55,y:165},{id:5,x:165,y:165},{id:6,x:275,y:165},
+            {id:7,x:55,y:275},{id:8,x:165,y:275},{id:9,x:275,y:275}
+        ];
+
+        function patternEls() {
+            return {
+                screen: document.getElementById('pattern-lock-screen'),
+                card: document.getElementById('pattern-lock-card'),
+                canvas: document.getElementById('pattern-canvas'),
+                title: document.getElementById('pattern-lock-title'),
+                subtitle: document.getElementById('pattern-lock-subtitle'),
+                message: document.getElementById('pattern-lock-message'),
+                cancel: document.getElementById('pattern-cancel-setup-btn')
+            };
+        }
+        function patternConfig() {
+            try { return JSON.parse(localStorage.getItem(PATTERN_KEY) || 'null'); } catch { return null; }
+        }
+        function bytesToB64(bytes) {
+            let s = ''; bytes.forEach(b => s += String.fromCharCode(b)); return btoa(s);
+        }
+        function b64ToBytes(s) {
+            return Uint8Array.from(atob(s), c => c.charCodeAt(0));
+        }
+        async function derivePattern(pattern, salt, iterations = PATTERN_ITERATIONS) {
+            const material = await crypto.subtle.importKey('raw', new TextEncoder().encode(pattern), 'PBKDF2', false, ['deriveBits']);
+            const bits = await crypto.subtle.deriveBits({name:'PBKDF2', hash:'SHA-256', salt, iterations}, material, 256);
+            return new Uint8Array(bits);
+        }
+        function constantTimeEqual(a, b) {
+            if (a.length !== b.length) return false;
+            let diff = 0; for (let i=0; i<a.length; i++) diff |= a[i] ^ b[i]; return diff === 0;
+        }
+        function getAttemptState() {
+            try { return {...{count:0, blockedUntil:0}, ...JSON.parse(localStorage.getItem(PATTERN_ATTEMPT_KEY) || '{}')}; }
+            catch { return {count:0, blockedUntil:0}; }
+        }
+        function setAttemptState(v) { localStorage.setItem(PATTERN_ATTEMPT_KEY, JSON.stringify(v)); }
+        function blockRemaining() { return Math.max(0, getAttemptState().blockedUntil - Date.now()); }
+        function blockedText(ms) { return 'Too many attempts. Try again in ' + Math.ceil(ms / 1000) + ' seconds.'; }
+
+        function drawPattern(pointer) {
+            const {canvas} = patternEls(); if (!canvas) return;
+            const ctx = canvas.getContext('2d'); ctx.clearRect(0,0,330,330);
+            if (patternSequence.length) {
+                ctx.beginPath();
+                patternSequence.forEach((id, i) => { const p=patternPoints[id-1]; i ? ctx.lineTo(p.x,p.y) : ctx.moveTo(p.x,p.y); });
+                if (pointer && patternDrawing) ctx.lineTo(pointer.x,pointer.y);
+                ctx.strokeStyle='#818cf8'; ctx.lineWidth=8; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.stroke();
+            }
+            patternPoints.forEach(p => {
+                const selected = patternSequence.includes(p.id);
+                ctx.beginPath(); ctx.arc(p.x,p.y,selected?18:14,0,Math.PI*2);
+                ctx.fillStyle=selected?'#a5b4fc':'#e2e8f0'; ctx.fill();
+                ctx.beginPath(); ctx.arc(p.x,p.y,selected?7:5,0,Math.PI*2);
+                ctx.fillStyle=selected?'#312e81':'#64748b'; ctx.fill();
+            });
+        }
+        function canvasPosition(ev) {
+            const c=patternEls().canvas, r=c.getBoundingClientRect();
+            return {x:(ev.clientX-r.left)*(c.width/r.width), y:(ev.clientY-r.top)*(c.height/r.height)};
+        }
+        function addPatternPoint(pos) {
+            const p=patternPoints.find(n => Math.hypot(n.x-pos.x,n.y-pos.y)<=30);
+            if (p && !patternSequence.includes(p.id)) patternSequence.push(p.id);
+        }
+        function clearPattern(message='') {
+            patternSequence=[]; patternDrawing=false; drawPattern();
+            patternEls().message.textContent=message;
+        }
+        function shakePattern() {
+            const card=patternEls().card; card.classList.remove('pattern-shake'); void card.offsetWidth; card.classList.add('pattern-shake');
+        }
+        function showPatternScreen(title, subtitle) {
+            const e=patternEls(); e.screen.classList.remove('unlocked'); e.title.textContent=title; e.subtitle.textContent=subtitle;
+            document.body.style.overflow='hidden'; clearPattern();
+        }
+        function hidePatternScreen() {
+            patternEls().screen.classList.add('unlocked'); document.body.style.overflow='';
+        }
+        async function saveNewPattern(pattern) {
+            const salt=crypto.getRandomValues(new Uint8Array(16));
+            const hash=await derivePattern(pattern,salt);
+            localStorage.setItem(PATTERN_KEY, JSON.stringify({version:1, algorithm:'PBKDF2-SHA-256', iterations:PATTERN_ITERATIONS, salt:bytesToB64(salt), hash:bytesToB64(hash)}));
+            setAttemptState({count:0,blockedUntil:0});
+        }
+        async function verifySavedPattern(pattern) {
+            const cfg=patternConfig(); if (!cfg) return false;
+            const actual=await derivePattern(pattern,b64ToBytes(cfg.salt),cfg.iterations);
+            return constantTimeEqual(actual,b64ToBytes(cfg.hash));
+        }
+        async function completePattern() {
+            if (!patternSequence.length) return;
+            const pattern=patternSequence.join('-'), e=patternEls();
+            const wait=blockRemaining();
+            if (patternMode==='unlock' && wait>0) { clearPattern(blockedText(wait)); return; }
+            if (patternSequence.length<PATTERN_MIN_POINTS) { shakePattern(); clearPattern('Use at least 4 different dots.'); return; }
+            if (patternMode==='setup' || patternMode==='changeNew') {
+                if (!patternConfirm) {
+                    patternConfirm=pattern; clearPattern('Draw the same pattern again to confirm.'); return;
+                }
+                if (pattern!==patternConfirm) { patternConfirm=null; shakePattern(); clearPattern('Patterns did not match. Start again.'); return; }
+                await saveNewPattern(pattern); patternConfirm=null; patternMode='unlock';
+                unlockPatternApp('Pattern saved.'); return;
+            }
+            if (patternMode==='changeVerify') {
+                if (await verifySavedPattern(pattern)) {
+                    patternMode='changeNew'; patternConfirm=null;
+                    e.title.textContent='Create New Pattern'; e.subtitle.textContent='Draw a new pattern using at least 4 dots.';
+                    clearPattern('Current pattern verified.');
+                } else { shakePattern(); clearPattern('Current pattern is incorrect.'); }
+                return;
+            }
+            if (await verifySavedPattern(pattern)) {
+                setAttemptState({count:0,blockedUntil:0}); unlockPatternApp();
+            } else {
+                let a=getAttemptState(); a.count=(a.count||0)+1;
+                if (a.count>=5) { const level=Math.min(4,Math.floor(a.count/5)-1); a.blockedUntil=Date.now()+30000*Math.pow(2,level); }
+                setAttemptState(a); shakePattern();
+                clearPattern(a.blockedUntil>Date.now()?blockedText(a.blockedUntil-Date.now()):'Incorrect pattern. '+(5-(a.count%5))+' attempt(s) before temporary lock.');
+            }
+        }
+        function unlockPatternApp(message='') {
+            patternUnlocked=true; hidePatternScreen(); resetPatternIdle();
+            if (!patternBooted) { patternBooted=true; boot(); }
+            if (message) setTimeout(() => toast(message.toUpperCase()), 250);
+        }
+        function lockPatternApp(reason='manual') {
+            if (!patternConfig()) return;
+            patternUnlocked=false; patternMode='unlock'; patternConfirm=null;
+            showPatternScreen('HRPro Locked', reason==='idle'?'Locked after 5 minutes of inactivity. Draw your pattern.':'Draw your pattern to unlock the app.');
+            const wait=blockRemaining(); if (wait) patternEls().message.textContent=blockedText(wait);
+        }
+        function beginPatternChange() {
+            if (!patternUnlocked) return;
+            if (!patternConfig()) { patternMode='setup'; showPatternScreen('Create Security Pattern','Use at least 4 dots, then repeat it.'); return; }
+            patternMode='changeVerify'; patternConfirm=null;
+            showPatternScreen('Verify Current Pattern','Draw your current pattern before setting a new one.');
+            patternEls().cancel.classList.remove('hidden');
+        }
+        function cancelPatternChange() {
+            patternEls().cancel.classList.add('hidden'); patternMode='unlock'; patternConfirm=null; unlockPatternApp();
+        }
+        function resetPatternIdle() {
+            if (!patternUnlocked) return; clearTimeout(patternIdleTimer);
+            patternIdleTimer=setTimeout(() => lockPatternApp('idle'),PATTERN_IDLE_MS);
+        }
+        function initializePatternLock() {
+            const e=patternEls(); drawPattern();
+            e.canvas.addEventListener('pointerdown', ev => {
+                if (blockRemaining() && patternMode==='unlock') { e.message.textContent=blockedText(blockRemaining()); return; }
+                patternDrawing=true; patternSequence=[]; e.canvas.setPointerCapture(ev.pointerId);
+                const pos=canvasPosition(ev); addPatternPoint(pos); drawPattern(pos); ev.preventDefault();
+            });
+            e.canvas.addEventListener('pointermove', ev => { if (!patternDrawing) return; const pos=canvasPosition(ev); addPatternPoint(pos); drawPattern(pos); ev.preventDefault(); });
+            e.canvas.addEventListener('pointerup', async ev => { if (!patternDrawing) return; patternDrawing=false; addPatternPoint(canvasPosition(ev)); drawPattern(); await completePattern(); });
+            e.canvas.addEventListener('pointercancel', () => clearPattern());
+            document.getElementById('pattern-clear-btn').addEventListener('click',()=>clearPattern());
+            e.cancel.addEventListener('click',cancelPatternChange);
+            const cfg=patternConfig();
+            if (!window.crypto || !crypto.subtle) {
+                e.title.textContent='Secure Context Required'; e.subtitle.textContent='Open this app through HTTPS or localhost to use secure pattern verification.';
+                e.message.textContent='Web Crypto is unavailable in this context.'; return;
+            }
+            if (!cfg) { patternMode='setup'; showPatternScreen('Create Security Pattern','First use: draw a pattern with at least 4 dots, then repeat it.'); }
+            else { patternMode='unlock'; showPatternScreen('HRPro Secure Access','Draw your pattern to unlock the app.'); const wait=blockRemaining(); if(wait)e.message.textContent=blockedText(wait); }
+            ['pointerdown','keydown','wheel','touchstart'].forEach(name => document.addEventListener(name,resetPatternIdle,{passive:true}));
+            document.addEventListener('visibilitychange',()=>{
+                if(document.hidden) patternHiddenAt=Date.now();
+                else if(patternUnlocked && patternHiddenAt && Date.now()-patternHiddenAt>=PATTERN_HIDDEN_LOCK_MS) lockPatternApp('idle');
+            });
+            window.addEventListener('blur',()=>{ patternHiddenAt=Date.now(); });
+        }
+        // ===== End secure pattern lock =====
+
+        document.addEventListener('DOMContentLoaded', initializePatternLock);
         
         document.addEventListener('keydown', e => {
             if (e.key === 'PageDown') { e.preventDefault(); nextPage(1) }
