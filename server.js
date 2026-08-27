@@ -296,6 +296,83 @@ app.get("/api/auth/users", requireAuth, requireSuperAdmin, async (req, res) => {
   }
 });
 
+
+// Update an existing standard account: name, username, optional password and page permissions.
+app.put("/api/auth/users/:id", requireAuth, requireSuperAdmin, async (req, res) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "Invalid account ID" });
+    }
+
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: "Account not found" });
+    }
+
+    // Protect the fixed Super Admin account from accidental modification.
+    if (isSuperAdmin(user)) {
+      return res.status(400).json({
+        message: "Super Admin account cannot be changed from Previous Users"
+      });
+    }
+
+    const fullName = String(req.body.fullName || "").trim().slice(0, 80);
+    const username = normalizeUsername(req.body.username);
+    const newPassword = String(req.body.password || "");
+
+    if (!fullName) {
+      return res.status(400).json({ message: "Full name is required" });
+    }
+
+    if (!/^[a-z0-9._-]{3,50}$/.test(username)) {
+      return res.status(400).json({
+        message: "Username must be 3-50 characters and use only letters, numbers, dots, underscores or hyphens"
+      });
+    }
+
+    const duplicate = await User.exists({
+      username,
+      _id: { $ne: user._id }
+    });
+
+    if (duplicate) {
+      return res.status(409).json({ message: "Username already exists" });
+    }
+
+    if (newPassword && newPassword.length < 8) {
+      return res.status(400).json({
+        message: "New password must contain at least 8 characters"
+      });
+    }
+
+    user.fullName = fullName;
+    user.username = username;
+    user.role = "user";
+    user.level = 1;
+    user.permissions = normalizePermissions(req.body.permissions);
+
+    // Blank password means retain the user's current password.
+    if (newPassword) {
+      user.password = await bcrypt.hash(newPassword, 12);
+    }
+
+    await user.save();
+
+    res.json({
+      message: "Previous user updated successfully",
+      user: safeUser(user)
+    });
+  } catch (error) {
+    console.error("Existing user update error:", error);
+
+    if (error && error.code === 11000) {
+      return res.status(409).json({ message: "Username already exists" });
+    }
+
+    res.status(500).json({ message: "Unable to update previous user" });
+  }
+});
+
 app.put("/api/auth/users/:id/permissions", requireAuth, requireSuperAdmin, async (req, res) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
