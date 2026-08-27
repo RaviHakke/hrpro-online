@@ -119,6 +119,20 @@
         .auth-message { min-height:1.4rem; }
         .auth-spinner { animation:authSpin .8s linear infinite; }
         @keyframes authSpin { to { transform:rotate(360deg); } }
+
+        /* RBAC settings and account UI */
+        .settings-section { border:1px solid rgba(148,163,184,.24); border-radius:1rem; overflow:hidden; background:rgba(255,255,255,.55); }
+        .dark .settings-section { background:rgba(15,23,42,.28); }
+        .settings-section summary { list-style:none; cursor:pointer; padding:.85rem 1rem; font-weight:900; display:flex; align-items:center; justify-content:space-between; }
+        .settings-section summary::-webkit-details-marker { display:none; }
+        .settings-section[open] summary { background:rgba(99,102,241,.09); color:#4f46e5; }
+        .dark .settings-section[open] summary { color:#c7d2fe; }
+        .settings-items { padding:.35rem .9rem .9rem; display:grid; gap:.3rem; }
+        .settings-item { padding:.65rem .7rem; border-radius:.8rem; cursor:pointer; display:flex; align-items:center; gap:.7rem; }
+        .settings-item:hover { background:rgba(99,102,241,.10); }
+        .user-avatar { width:2.5rem; height:2.5rem; border-radius:999px; background:#fff; color:#4338ca; display:flex; align-items:center; justify-content:center; font-size:.78rem; font-weight:950; box-shadow:0 6px 16px rgba(15,23,42,.18); border:2px solid rgba(255,255,255,.55); }
+        .permission-grid { display:grid; grid-template-columns:minmax(150px,1.3fr) repeat(3,minmax(86px,1fr)); gap:.35rem; align-items:center; }
+        @media(max-width:640px){ .permission-grid { grid-template-columns:1fr; } .permission-grid-head{display:none;} }
     </style>
 </head>
 
@@ -172,78 +186,66 @@
                 <button id="nav-employees" onclick="page('employees')" class="tab px-4 py-2 rounded-xl text-sm font-extrabold text-indigo-100">Employees</button>
                 <button id="nav-interviews" onclick="page('interviews')" class="tab px-4 py-2 rounded-xl text-sm font-extrabold text-indigo-100">Interviews</button>
             </nav>
-            <button onclick="openTrash()" class="relative bg-indigo-700 px-3 py-2 rounded-xl" id="nav-trash-btn">
-                <i class="fa-solid fa-trash"></i>
-                <span id="trash-badge" class="hidden absolute -top-2 -right-2 bg-red-500 text-white text-[10px] rounded-full h-5 w-5 items-center justify-center"></span>
-            </button>
+            <div class="flex items-center gap-2">
+                <button onclick="openTrash()" class="relative bg-indigo-700 px-3 py-2 rounded-xl" id="nav-trash-btn" title="Recycle Bin">
+                    <i class="fa-solid fa-trash"></i>
+                    <span id="trash-badge" class="hidden absolute -top-2 -right-2 bg-red-500 text-white text-[10px] rounded-full h-5 w-5 items-center justify-center"></span>
+                </button>
+                <button onclick="toggleSide()" class="user-avatar" id="header-user-avatar" title="Open account settings">U</button>
+            </div>
         </div>
     </header>
 
     <div id="overlay" onclick="toggleSide()" class="hidden fixed inset-0 bg-black/40 z-50"></div>
 
     <aside id="side" class="fixed z-50 inset-y-0 left-0 w-80 glass shadow-2xl p-5 transform -translate-x-full transition overflow-y-auto">
-        <div class="flex justify-between border-b dark:border-slate-700 pb-3 mb-5">
-            <b><i class="fa-solid fa-gear text-indigo-500 mr-2"></i>Settings</b>
+        <div class="flex justify-between border-b dark:border-slate-700 pb-3 mb-4">
+            <div><p class="text-[10px] uppercase tracking-widest text-slate-400 font-black">Control Centre</p><b><i class="fa-solid fa-gear text-indigo-500 mr-2"></i>Settings</b></div>
             <button onclick="toggleSide()"><i class="fa-solid fa-xmark"></i></button>
         </div>
-        <div class="space-y-4 text-sm" id="sidebar-admin-items">
-            <label class="block cursor-pointer">
-                <i class="fa-solid fa-file-import text-emerald-500 mr-2"></i>Import Employee Excel
-                <input type="file" accept=".xls,.xlsx" class="hidden" onchange="startImport(event,'emp')">
-            </label>
-            <div onclick="exportSelectedOrAll('emp',false)" class="cursor-pointer">
-                <i class="fa-solid fa-download text-blue-500 mr-2"></i>Export All Employees
-            </div>
-            <div onclick="exportCandidateWordTemplate()" class="cursor-pointer">
-                <i class="fa-solid fa-file-word text-purple-500 mr-2"></i>Download MS Form Word Template
-            </div>
-            <label class="block cursor-pointer">
-                <i class="fa-solid fa-cloud-arrow-up text-pink-500 mr-2"></i>Import Candidate Form Export
-                <input type="file" accept=".xls,.xlsx,.csv" class="hidden" onchange="importCandidateFormExport(event)">
-            </label>
-            <label class="block cursor-pointer">
-                <i class="fa-solid fa-file-import text-emerald-500 mr-2"></i>Import Interview Excel
-                <input type="file" accept=".xls,.xlsx" class="hidden" onchange="startImport(event,'int')">
-            </label>
-            <div onclick="exportSelectedOrAll('int',false)" class="cursor-pointer">
-                <i class="fa-solid fa-download text-blue-500 mr-2"></i>Export All Interviews
-            </div>
-            <hr class="dark:border-slate-700">
-            <div onclick="backup()" class="cursor-pointer">
-                <i class="fa-solid fa-database text-blue-500 mr-2"></i>Backup Everything
-            </div>
-            <div onclick="chooseAutoBackupFolder()" class="cursor-pointer">
-                <i class="fa-solid fa-folder-open text-amber-500 mr-2"></i>Choose Auto Backup Folder
-            </div>
-            <div onclick="autoBackupNow(true)" class="cursor-pointer">
-                <i class="fa-solid fa-floppy-disk text-indigo-500 mr-2"></i>Backup Now to Default Folder
-            </div>
-            <div onclick="autoRestoreFromDefault(true)" class="cursor-pointer">
-                <i class="fa-solid fa-rotate-left text-emerald-500 mr-2"></i>Restore From Default Folder
-            </div>
-            <div onclick="saveAndCloseApp()" class="cursor-pointer">
-                <i class="fa-solid fa-right-from-bracket text-red-500 mr-2"></i>Save Backup & Close App
-            </div>
-            <div id="auto-backup-status" class="text-[11px] text-slate-500 leading-4 bg-slate-50 dark:bg-slate-800 rounded-xl p-2">
-                Auto backup folder: not selected
-            </div>
-            <label class="block cursor-pointer">
-                <i class="fa-solid fa-upload text-emerald-500 mr-2"></i>Restore Backup
-                <input type="file" accept=".json" class="hidden" onchange="restore(event)">
-            </label>
-            <hr class="dark:border-slate-700">
+        <div class="rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 p-3 mb-4 flex items-center gap-3">
+            <div id="settings-user-avatar" class="user-avatar bg-indigo-600 text-white">U</div>
+            <div class="min-w-0"><div class="text-[10px] uppercase tracking-widest text-slate-400 font-black">Signed in as</div><div id="auth-user-name" class="font-black text-indigo-700 dark:text-indigo-200 truncate">User</div><div id="auth-user-access" class="text-[10px] text-slate-500">Account</div></div>
         </div>
-
-        <div class="space-y-4 text-sm mt-4">
-            <div class="rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 p-3">
-                <div class="text-[10px] uppercase tracking-widest text-slate-400 font-black">Signed in as</div>
-                <div id="auth-user-name" class="mt-1 font-black text-indigo-700 dark:text-indigo-200">User</div>
-            </div>
-            
-            <div onclick="openPasswordModal()" class="cursor-pointer"><i class="fa-solid fa-key text-amber-500 mr-2"></i>Change Password</div>
-            <div id="btn-create-account" onclick="createNewAccount()" class="cursor-pointer font-bold text-indigo-600 dark:text-indigo-300"><i class="fa-solid fa-user-plus mr-2"></i>Create New Account</div>
-            <div onclick="logoutAdmin()" class="cursor-pointer text-red-600 dark:text-red-300"><i class="fa-solid fa-right-from-bracket mr-2"></i>Sign Out</div>
-            <label><input type="checkbox" id="dark" onchange="darkMode()"> Dark Mode</label>
+        <div class="space-y-3 text-sm">
+            <details id="settings-users" class="settings-section">
+                <summary><span><i class="fa-solid fa-users-gear mr-2"></i>User Management</span><i class="fa-solid fa-chevron-down text-xs"></i></summary>
+                <div class="settings-items">
+                    <div id="btn-manage-accounts" onclick="openUserManagement()" class="settings-item font-bold text-indigo-600 dark:text-indigo-300"><i class="fa-solid fa-user-shield"></i>Accounts & Page Permissions</div>
+                    <div id="btn-create-account" onclick="openUserManagement(true)" class="settings-item"><i class="fa-solid fa-user-plus text-emerald-500"></i>Create New Account</div>
+                </div>
+            </details>
+            <details id="settings-data" class="settings-section">
+                <summary><span><i class="fa-solid fa-database mr-2"></i>Data Management</span><i class="fa-solid fa-chevron-down text-xs"></i></summary>
+                <div class="settings-items" id="sidebar-admin-items">
+                    <label class="settings-item"><i class="fa-solid fa-file-import text-emerald-500"></i>Import Employee Excel<input type="file" accept=".xls,.xlsx" class="hidden" onchange="startImport(event,'emp')"></label>
+                    <div onclick="exportSelectedOrAll('emp',false)" class="settings-item"><i class="fa-solid fa-download text-blue-500"></i>Export All Employees</div>
+                    <div onclick="exportCandidateWordTemplate()" class="settings-item"><i class="fa-solid fa-file-word text-purple-500"></i>Download MS Form Template</div>
+                    <label class="settings-item"><i class="fa-solid fa-cloud-arrow-up text-pink-500"></i>Import Candidate Form<input type="file" accept=".xls,.xlsx,.csv" class="hidden" onchange="importCandidateFormExport(event)"></label>
+                    <label class="settings-item"><i class="fa-solid fa-file-import text-emerald-500"></i>Import Interview Excel<input type="file" accept=".xls,.xlsx" class="hidden" onchange="startImport(event,'int')"></label>
+                    <div onclick="exportSelectedOrAll('int',false)" class="settings-item"><i class="fa-solid fa-download text-blue-500"></i>Export All Interviews</div>
+                    <div onclick="backup()" class="settings-item"><i class="fa-solid fa-database text-blue-500"></i>Backup Everything</div>
+                    <label class="settings-item"><i class="fa-solid fa-upload text-emerald-500"></i>Restore Backup<input type="file" accept=".json" class="hidden" onchange="restore(event)"></label>
+                </div>
+            </details>
+            <details id="settings-backup" class="settings-section">
+                <summary><span><i class="fa-solid fa-hard-drive mr-2"></i>Automatic Backup</span><i class="fa-solid fa-chevron-down text-xs"></i></summary>
+                <div class="settings-items">
+                    <div onclick="chooseAutoBackupFolder()" class="settings-item"><i class="fa-solid fa-folder-open text-amber-500"></i>Choose Backup Folder</div>
+                    <div onclick="autoBackupNow(true)" class="settings-item"><i class="fa-solid fa-floppy-disk text-indigo-500"></i>Backup Now</div>
+                    <div onclick="autoRestoreFromDefault(true)" class="settings-item"><i class="fa-solid fa-rotate-left text-emerald-500"></i>Restore Default Backup</div>
+                    <div onclick="saveAndCloseApp()" class="settings-item"><i class="fa-solid fa-right-from-bracket text-red-500"></i>Save Backup & Close</div>
+                    <div id="auto-backup-status" class="text-[11px] text-slate-500 leading-4 bg-slate-50 dark:bg-slate-800 rounded-xl p-2">Auto backup folder: not selected</div>
+                </div>
+            </details>
+            <details open class="settings-section">
+                <summary><span><i class="fa-solid fa-shield-halved mr-2"></i>Account & Security</span><i class="fa-solid fa-chevron-down text-xs"></i></summary>
+                <div class="settings-items">
+                    <div onclick="openPasswordModal()" class="settings-item"><i class="fa-solid fa-key text-amber-500"></i>Change Password</div>
+                    <label class="settings-item"><input type="checkbox" id="dark" onchange="darkMode()"> Dark Mode</label>
+                    <div onclick="logoutAdmin()" class="settings-item text-red-600 dark:text-red-300"><i class="fa-solid fa-right-from-bracket"></i>Sign Out</div>
+                </div>
+            </details>
         </div>
     </aside>
 
@@ -457,6 +459,29 @@
                 <label class="block text-xs font-bold">Message<input id="reminder-message" placeholder="INTERVIEW REMINDER" class="mt-1 w-full p-2 rounded-xl border dark:bg-slate-700 dark:border-slate-600 uppercase"></label>
                 <div class="text-right"><button type="button" onclick="closeReminder()" class="btn btn-s">Cancel</button> <button class="btn bg-purple-600 text-white act-btn">Save Reminder</button></div>
             </form>
+        </div>
+    </div>
+    <div id="user-management-modal" class="hidden fixed inset-0 z-[96] bg-black/60 p-4 items-center justify-center">
+        <div class="glass rounded-3xl modal-shell w-full max-w-5xl max-h-[92vh] flex flex-col">
+            <div class="p-5 bg-gradient-to-r from-indigo-600 to-purple-700 text-white flex justify-between items-center">
+                <div><p class="text-[10px] uppercase tracking-widest text-indigo-100 font-black">Super Admin Only</p><b class="text-xl"><i class="fa-solid fa-user-shield mr-2"></i>Accounts & Page Permissions</b></div>
+                <button onclick="closeUserManagement()" class="h-9 w-9 rounded-xl bg-white/15"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-5 overflow-y-auto scroll space-y-5">
+                <form id="new-user-form" onsubmit="saveNewAccount(event)" class="rounded-3xl border dark:border-slate-700 p-4 bg-slate-50/70 dark:bg-slate-900/30">
+                    <div class="flex items-center justify-between mb-3"><div><b>Create Account</b><p class="text-xs text-slate-500">Only Super Admin can create accounts.</p></div><span class="chip bg-indigo-100 text-indigo-700">NEW USER</span></div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <label class="text-xs font-black">Full Name<input id="new-full-name" required maxlength="80" class="auth-input mt-1" placeholder="Employee full name"></label>
+                        <label class="text-xs font-black">Username<input id="new-username" required maxlength="50" class="auth-input mt-1" placeholder="Username"></label>
+                        <label class="text-xs font-black">Password<input id="new-user-password" required minlength="8" type="password" class="auth-input mt-1" placeholder="Minimum 8 characters"></label>
+                        <label class="text-xs font-black">Account Type<select id="new-user-role" class="auth-input mt-1" onchange="syncNewUserPermissions()"><option value="user">Standard Account</option><option value="superadmin">Super Admin</option></select></label>
+                    </div>
+                    <div class="mt-4 permission-grid permission-grid-head text-[10px] font-black uppercase text-slate-400"><div>Page</div><div>Hidden</div><div>Read</div><div>Write</div></div>
+                    <div id="new-user-permissions" class="mt-2 space-y-2"></div>
+                    <div class="mt-4 text-right"><button class="btn btn-i"><i class="fa-solid fa-user-plus"></i>Create Account</button></div>
+                </form>
+                <section><div class="flex justify-between items-end mb-3"><div><b>Existing Accounts</b><p class="text-xs text-slate-500">Update page visibility and Read/Write authority.</p></div><button onclick="loadUserAccounts()" class="btn btn-s"><i class="fa-solid fa-rotate"></i>Refresh</button></div><div id="user-account-list" class="space-y-3"></div></section>
+            </div>
         </div>
     </div>
     <div id="toast" class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-[110] bg-slate-800 dark:bg-slate-100 text-white dark:text-slate-900 px-6 py-3 rounded-full shadow-lg text-sm font-medium toast"></div>
@@ -1704,6 +1729,77 @@
             var splash = document.getElementById('splash');
             if(splash) { splash.classList.add('hide'); }
         });
+
+        // ===== Page-wise permissions (Hidden / Read / Write) =====
+        const APP_PAGES = [
+            {key:'dashboard',label:'Dashboard'},
+            {key:'employees',label:'Employee Master'},
+            {key:'interviews',label:'Interview Tracker'},
+            {key:'settings',label:'Settings & Data Tools'}
+        ];
+        function isSuperAdmin(){ return !!authenticatedUser && (authenticatedUser.role === 'superadmin' || authenticatedUser.level === 3); }
+        function normalizedPermissions(user=authenticatedUser){
+            if(!user) return {};
+            if(user.role === 'superadmin' || user.level === 3) return Object.fromEntries(APP_PAGES.map(p=>[p.key,'write']));
+            if(user.permissions) return {...user.permissions};
+            if(user.level === 1) return {dashboard:'hidden',employees:'hidden',interviews:'read',settings:'hidden'};
+            return {dashboard:'read',employees:'read',interviews:'read',settings:'hidden'};
+        }
+        function pageAccess(key){ return isSuperAdmin() ? 'write' : (normalizedPermissions()[key] || 'hidden'); }
+        function canSeePage(key){ return pageAccess(key) !== 'hidden'; }
+        function canWritePage(key){ return pageAccess(key) === 'write'; }
+        function canWriteAnyPage(){ return isSuperAdmin() || APP_PAGES.some(p=>canWritePage(p.key)); }
+        function userInitials(name){ return String(name||'U').trim().split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase() || 'U'; }
+        function updateUserIdentityUI(){
+            let full=authenticatedUser?.fullName || authenticatedUser?.name || authenticatedUser?.username || 'User';
+            let initials=userInitials(full);
+            ['header-user-avatar','settings-user-avatar'].forEach(id=>{let e=document.getElementById(id);if(e){e.textContent=initials;e.title=full;}});
+            let access=document.getElementById('auth-user-access'); if(access) access.textContent=isSuperAdmin()?'Super Admin':'Custom Page Access';
+        }
+        const originalUpdateAuthenticatedUser=updateAuthenticatedUser;
+        updateAuthenticatedUser=function(u){
+            originalUpdateAuthenticatedUser(u);
+            let e=document.getElementById('auth-user-name'); if(e && u) e.textContent=(u.fullName||u.name||u.username||'User')+(isSuperAdmin()?' (Super Admin)':'');
+            updateUserIdentityUI();
+        };
+        function firstVisiblePage(){ return APP_PAGES.find(p=>p.key!=='settings' && canSeePage(p.key))?.key || null; }
+        applyPermissions=function(){
+            if(!authenticatedUser) return;
+            APP_PAGES.filter(p=>p.key!=='settings').forEach(p=>{
+                let nav=document.getElementById('nav-'+p.key); if(nav) nav.style.display=canSeePage(p.key)?'':'none';
+            });
+            let superOnly=isSuperAdmin();
+            ['btn-create-account','btn-manage-accounts'].forEach(id=>{let e=document.getElementById(id);if(e)e.style.display=superOnly?'flex':'none';});
+            let users=document.getElementById('settings-users'); if(users) users.style.display=superOnly?'block':'none';
+            let side=document.getElementById('side'); if(side) side.style.display=canSeePage('settings')||superOnly?'':'none';
+            let data=document.getElementById('sidebar-admin-items'); if(data) data.style.display=canWritePage('settings')||superOnly?'grid':'none';
+            let backup=document.getElementById('settings-backup'); if(backup) backup.style.display=canWritePage('settings')||superOnly?'block':'none';
+            let trashBtn=document.getElementById('nav-trash-btn'); if(trashBtn) trashBtn.style.display=(canWritePage('employees')||canWritePage('interviews')||superOnly)?'':'none';
+            document.querySelectorAll('.act-btn').forEach(b=>b.style.setProperty('display',canWriteAnyPage()?'':'none',canWriteAnyPage()?'':'important'));
+            updateUserIdentityUI();
+            let current=APP_PAGES.find(p=>p.key!=='settings' && document.getElementById('page-'+p.key) && !document.getElementById('page-'+p.key).classList.contains('hidden'))?.key;
+            if(!current || !canSeePage(current)){let first=firstVisiblePage();if(first) page(first);}
+            renderEmp(); renderInt();
+        };
+        const originalPage=page;
+        page=function(p){ if(!canSeePage(p)){let first=firstVisiblePage();if(!first)return toast('NO PAGE ACCESS ASSIGNED');p=first;} originalPage(p); };
+        nextPage=function(d){let pages=APP_PAGES.filter(p=>p.key!=='settings'&&canSeePage(p.key)).map(p=>p.key);if(!pages.length)return;let cur=pages.findIndex(p=>!document.getElementById('page-'+p).classList.contains('hidden'));page(pages[(cur+d+pages.length)%pages.length]);};
+        function assertWrite(key){ if(!canWritePage(key)&&!isSuperAdmin()){toast('READ ONLY ACCESS');return false;}return true; }
+        const originalOpenEmp=openEmp; openEmp=function(id){if(!assertWrite('employees'))return;originalOpenEmp(id);};
+        const originalOpenInt=openInt; openInt=function(id){if(!assertWrite('interviews'))return;originalOpenInt(id);};
+        const originalSaveEmp=saveEmp; saveEmp=function(ev){if(!assertWrite('employees')){ev.preventDefault();return;}return originalSaveEmp(ev);};
+        const originalSaveInt=saveInt; saveInt=function(ev){if(!assertWrite('interviews')){ev.preventDefault();return;}return originalSaveInt(ev);};
+        const originalDel=del; del=async function(type,id){if(!assertWrite(type==='emp'?'employees':'interviews'))return;return originalDel(type,id);};
+        const originalBulkDelete=bulkDelete; bulkDelete=function(type){if(!assertWrite(type==='emp'?'employees':'interviews'))return;return originalBulkDelete(type);};
+        function permissionRows(prefix,permissions={}){return APP_PAGES.map(p=>{let value=permissions[p.key]||'hidden';return `<div class="permission-grid rounded-2xl border dark:border-slate-700 p-2"><div class="font-black text-xs">${p.label}</div>${['hidden','read','write'].map(v=>`<label class="text-xs font-bold flex items-center gap-2"><input type="radio" name="${prefix}-${p.key}" value="${v}" ${value===v?'checked':''}> ${v[0].toUpperCase()+v.slice(1)}</label>`).join('')}</div>`}).join('');}
+        function readPermissionForm(prefix){return Object.fromEntries(APP_PAGES.map(p=>[p.key,document.querySelector(`input[name="${prefix}-${p.key}"]:checked`)?.value||'hidden']));}
+        function syncNewUserPermissions(){let role=document.getElementById('new-user-role')?.value;document.getElementById('new-user-permissions').innerHTML=permissionRows('new',role==='superadmin'?Object.fromEntries(APP_PAGES.map(p=>[p.key,'write'])):{dashboard:'read',employees:'hidden',interviews:'read',settings:'hidden'});document.querySelectorAll('#new-user-permissions input').forEach(x=>x.disabled=role==='superadmin');}
+        async function openUserManagement(focusNew=false){if(!isSuperAdmin())return toast('SUPER ADMIN ACCESS REQUIRED');let m=document.getElementById('user-management-modal');m.classList.remove('hidden');m.classList.add('flex');syncNewUserPermissions();await loadUserAccounts();if(focusNew)setTimeout(()=>document.getElementById('new-full-name')?.focus(),100);}
+        function closeUserManagement(){let m=document.getElementById('user-management-modal');m.classList.add('hidden');m.classList.remove('flex');}
+        async function saveNewAccount(ev){ev.preventDefault();if(!isSuperAdmin())return;let role=document.getElementById('new-user-role').value;let payload={fullName:document.getElementById('new-full-name').value.trim(),username:document.getElementById('new-username').value.trim(),password:document.getElementById('new-user-password').value,role,permissions:role==='superadmin'?Object.fromEntries(APP_PAGES.map(p=>[p.key,'write'])):readPermissionForm('new')};try{let r=await authFetch('/api/auth/create-user',{method:'POST',body:JSON.stringify(payload)});let j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.message||'Account creation failed');toast(j.message||'ACCOUNT CREATED');ev.target.reset();syncNewUserPermissions();await loadUserAccounts();}catch(e){alert(e.message+'\n\nThe server API must support role and permissions fields.');}}
+        async function loadUserAccounts(){let box=document.getElementById('user-account-list');box.innerHTML='<p class="text-sm text-slate-400">Loading accounts...</p>';try{let r=await authFetch('/api/auth/users',{cache:'no-store'});let j=await r.json();let users=Array.isArray(j)?j:(j.users||[]);box.innerHTML=users.length?users.map((u,i)=>{let id=u.id||u._id||u.username;let pre='user-'+i;let role=u.role||(u.level===3?'superadmin':'user');return `<div class="rounded-3xl border dark:border-slate-700 p-4"><div class="flex flex-wrap justify-between gap-2 mb-3"><div class="flex items-center gap-3"><div class="user-avatar bg-indigo-600 text-white">${userInitials(u.fullName||u.name||u.username)}</div><div><b>${E(u.fullName||u.name||u.username)}</b><p class="text-xs text-slate-500">@${E(u.username)} · ${role==='superadmin'?'Super Admin':'Standard Account'}</p></div></div>${role==='superadmin'?'<span class="chip bg-purple-100 text-purple-700">FULL ACCESS</span>':`<button onclick="saveUserPermissions('${E(id)}','${pre}')" class="btn btn-i"><i class="fa-solid fa-floppy-disk"></i>Update Authority</button>`}</div>${role==='superadmin'?'':`<div class="space-y-2">${permissionRows(pre,normalizedPermissions(u))}</div>`}</div>`}).join(''):'<p class="p-6 text-center text-slate-400">NO ACCOUNTS RETURNED BY SERVER</p>';}catch(e){box.innerHTML='<div class="rounded-2xl bg-amber-50 text-amber-800 p-4 text-sm"><b>User list API not available.</b><br>The backend must provide GET /api/auth/users and PUT /api/auth/users/:id/permissions.</div>';}}
+        async function saveUserPermissions(id,prefix){try{let r=await authFetch('/api/auth/users/'+encodeURIComponent(id)+'/permissions',{method:'PUT',body:JSON.stringify({permissions:readPermissionForm(prefix)})});let j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.message||'Permission update failed');toast(j.message||'PERMISSIONS UPDATED');}catch(e){alert(e.message+'\n\nThe permission update endpoint must be added to the server.');}}
+        createNewAccount=function(){openUserManagement(true);};
     </script>
 </body>
 </html>
