@@ -110,36 +110,33 @@
         .dark .master-table th:last-child, .dark .master-table td:last-child { background: #1e293b; }
         .master-table thead th:last-child { z-index: 9; background: #f8fafc; }
         .dark .master-table thead th:last-child { background: #0f172a; }
+25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
 
-        /* Secure pattern-lock overlay */
-        #pattern-lock-screen { user-select: none; -webkit-user-select: none; }
-        #pattern-lock-screen.unlocked { opacity: 0; visibility: hidden; pointer-events: none; }
-        #pattern-canvas { touch-action: none; width: min(78vw, 330px); height: min(78vw, 330px); }
-        .pattern-shake { animation: patternShake .32s ease-in-out; }
-        @keyframes patternShake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
+        /* Secure server-authenticated login */
+        #login-screen { transition: opacity .25s ease, visibility .25s ease; }
+        #login-screen.authenticated { opacity:0; visibility:hidden; pointer-events:none; }
+        .auth-input { width:100%; padding:.82rem 1rem; border-radius:1rem; border:1px solid rgba(148,163,184,.38); background:rgba(255,255,255,.96); color:#0f172a; font-weight:700; }
+        .auth-input:focus { outline:none; border-color:#818cf8; box-shadow:0 0 0 4px rgba(129,140,248,.18); }
+        .auth-message { min-height:1.4rem; }
+        .auth-spinner { animation:authSpin .8s linear infinite; }
+        @keyframes authSpin { to { transform:rotate(360deg); } }
     </style>
 </head>
 
 <body class="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950 text-slate-800 dark:text-slate-100 pb-16">
 
-    <div id="pattern-lock-screen" class="fixed inset-0 z-[9999] bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 flex items-center justify-center p-4 transition-all duration-300" role="dialog" aria-modal="true" aria-labelledby="pattern-lock-title">
-        <div id="pattern-lock-card" class="w-full max-w-md rounded-3xl border border-white/15 bg-white/10 backdrop-blur-xl shadow-2xl p-6 text-center text-white">
-            <div class="mx-auto mb-4 h-16 w-16 rounded-2xl bg-indigo-500/25 flex items-center justify-center">
-                <i id="pattern-lock-icon" class="fa-solid fa-shield-halved text-3xl text-indigo-300"></i>
-            </div>
-            <h1 id="pattern-lock-title" class="text-2xl font-black">HRPro Secure Access</h1>
-            <p id="pattern-lock-subtitle" class="mt-2 text-sm text-slate-300">Draw your pattern to unlock the app.</p>
-            <div class="mt-5 flex justify-center">
-                <canvas id="pattern-canvas" width="330" height="330" class="rounded-3xl bg-slate-950/45 border border-white/10 shadow-inner" aria-label="3 by 3 pattern grid"></canvas>
-            </div>
-            <p id="pattern-lock-message" class="mt-4 min-h-6 text-sm font-bold text-indigo-200" aria-live="polite"></p>
-            <div class="mt-3 flex justify-center gap-2">
-                <button id="pattern-clear-btn" type="button" class="btn bg-white/10 text-white hover:bg-white/20"><i class="fa-solid fa-rotate-left"></i> Clear</button>
-                <button id="pattern-cancel-setup-btn" type="button" class="hidden btn bg-red-500/20 text-red-200 hover:bg-red-500/30">Cancel change</button>
-            </div>
-            <p class="mt-4 text-[11px] leading-4 text-slate-400">Your pattern is verified locally using a salted PBKDF2 hash. It is never stored as plain text.</p>
-        </div>
+    <div id="login-screen" class="fixed inset-0 z-[9999] bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="login-title">
+      <div class="w-full max-w-md rounded-3xl border border-white/15 bg-white/10 backdrop-blur-xl shadow-2xl p-7 text-white">
+        <div class="text-center"><div class="mx-auto mb-4 h-16 w-16 rounded-2xl bg-indigo-500/25 flex items-center justify-center"><i class="fa-solid fa-shield-halved text-3xl text-indigo-300"></i></div><p class="text-[11px] font-black uppercase tracking-[.24em] text-indigo-300">Administrator Access</p><h1 id="login-title" class="mt-1 text-2xl font-black">Sign in to HRPro</h1><p class="mt-2 text-sm text-slate-300">Enter the administrator username and password.</p></div>
+        <form id="login-form" class="mt-6 space-y-4" autocomplete="on">
+          <label class="block text-xs font-black text-slate-200">Username<input id="login-username" name="username" type="text" autocomplete="username" required maxlength="50" class="auth-input mt-1.5" placeholder="Administrator username"></label>
+          <label class="block text-xs font-black text-slate-200">Password<div class="relative mt-1.5"><input id="login-password" name="password" type="password" autocomplete="current-password" required class="auth-input pr-12" placeholder="Password"><button type="button" onclick="togglePassword('login-password',this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500" aria-label="Show or hide password"><i class="fa-solid fa-eye"></i></button></div></label>
+          <p id="login-message" class="auth-message text-sm font-bold text-rose-300" aria-live="polite"></p>
+          <button id="login-button" type="submit" class="w-full rounded-2xl bg-indigo-500 hover:bg-indigo-400 px-4 py-3 font-black shadow-lg transition"><i class="fa-solid fa-right-to-bracket mr-2"></i>Sign In</button>
+        </form><p class="mt-5 text-center text-[11px] leading-4 text-slate-400">Password verification and HRPro data access are enforced by the server.</p>
+      </div>
     </div>
+    <div id="password-modal" class="hidden fixed inset-0 z-[9998] bg-black/60 p-4 items-center justify-center"><div class="glass rounded-3xl shadow-2xl w-full max-w-md overflow-hidden"><div class="p-5 bg-gradient-to-r from-indigo-600 to-purple-700 text-white flex justify-between items-center"><div><p class="text-[10px] uppercase tracking-widest text-indigo-100 font-black">Administrator Only</p><b class="text-xl">Change Password</b></div><button type="button" onclick="closePasswordModal()" class="h-9 w-9 rounded-xl bg-white/15"><i class="fa-solid fa-xmark"></i></button></div><form id="password-form" class="p-5 space-y-4"><label class="block text-xs font-black">Current Password<input id="current-password" type="password" autocomplete="current-password" required class="auth-input mt-1.5 dark:bg-slate-800 dark:text-white"></label><label class="block text-xs font-black">New Password<input id="new-password" type="password" autocomplete="new-password" required minlength="10" class="auth-input mt-1.5 dark:bg-slate-800 dark:text-white"></label><label class="block text-xs font-black">Confirm New Password<input id="confirm-password" type="password" autocomplete="new-password" required minlength="10" class="auth-input mt-1.5 dark:bg-slate-800 dark:text-white"></label><p class="text-[11px] text-slate-500">Minimum 10 characters with uppercase, lowercase, and a number.</p><p id="password-message" class="auth-message text-sm font-bold text-rose-600" aria-live="polite"></p><div class="flex justify-end gap-2"><button type="button" onclick="closePasswordModal()" class="btn btn-s">Cancel</button><button id="password-submit" class="btn btn-i"><i class="fa-solid fa-key"></i>Change Password</button></div></form></div></div>
     <div id="splash" class="fixed inset-0 z-[99] bg-gradient-to-br from-indigo-600 to-indigo-900 flex flex-col items-center justify-center text-white">
         <div class="bg-white p-6 rounded-3xl shadow-2xl mb-7">
             <i class="fa-solid fa-users-gear text-6xl text-indigo-600"></i>
@@ -184,7 +181,7 @@
             </div>
             <label class="block cursor-pointer">
                 <i class="fa-solid fa-cloud-arrow-up text-pink-500 mr-2"></i>Import Candidate Form Export
-                <input type="file" accept=".xls,.xlsx" class="hidden" onchange="importCandidateFormExport(event)">
+                <input type="file" accept=".xls,.xlsx,.csv" class="hidden" onchange="importCandidateFormExport(event)">
             </label>
             <label class="block cursor-pointer">
                 <i class="fa-solid fa-file-import text-emerald-500 mr-2"></i>Import Interview Excel
@@ -216,15 +213,11 @@
                 <i class="fa-solid fa-upload text-emerald-500 mr-2"></i>Restore Backup
                 <input type="file" accept=".json" class="hidden" onchange="restore(event)">
             </label>
-            <hr class="dark:border-slate-700">
 
             <hr class="dark:border-slate-700">
-            <div onclick="lockPatternApp('manual')" class="cursor-pointer">
-                <i class="fa-solid fa-lock text-indigo-500 mr-2"></i>Lock App Now
-            </div>
-            <div onclick="beginPatternChange()" class="cursor-pointer">
-                <i class="fa-solid fa-shield-halved text-amber-500 mr-2"></i>Change Pattern
-            </div>
+            <div class="rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 p-3"><div class="text-[10px] uppercase tracking-widest text-slate-400 font-black">Signed in as</div><div id="auth-user-name" class="mt-1 font-black text-indigo-700 dark:text-indigo-200">Administrator</div></div>
+            <div onclick="openPasswordModal()" class="cursor-pointer"><i class="fa-solid fa-key text-amber-500 mr-2"></i>Change Administrator Password</div>
+            <div onclick="logoutAdmin()" class="cursor-pointer text-red-600 dark:text-red-300"><i class="fa-solid fa-right-from-bracket mr-2"></i>Sign Out</div>
             <label><input type="checkbox" id="dark" onchange="darkMode()"> Dark Mode</label>
         </div>
     </aside>
@@ -281,7 +274,7 @@
                     </select>
                     <button onclick="clearEmpFilters()" class="btn btn-s"><i class="fa-solid fa-filter-circle-xmark"></i> Clear</button>
                     <button onclick="exportCandidateWordTemplate()" class="btn bg-purple-600 text-white"><i class="fa-solid fa-file-word"></i> MS Form Word</button>
-                    <label class="btn bg-pink-600 text-white cursor-pointer"><i class="fa-solid fa-cloud-arrow-up"></i> Import Form Export<input type="file" accept=".xls,.xlsx" class="hidden" onchange="importCandidateFormExport(event)"></label>
+                    <label class="btn bg-pink-600 text-white cursor-pointer"><i class="fa-solid fa-cloud-arrow-up"></i> Import Form Export<input type="file" accept=".xls,.xlsx,.csv" class="hidden" onchange="importCandidateFormExport(event)"></label>
                     <label class="btn btn-e cursor-pointer">
                         Import<input type="file" accept=".xls,.xlsx" class="hidden" onchange="startImport(event,'emp')">
                     </label>
@@ -355,6 +348,7 @@
                 <button onclick="clearIntFilters()" class="btn btn-s"><i class="fa-solid fa-filter-circle-xmark"></i>Clear Filters</button>
             </div>
             <div class="flex flex-wrap gap-2 mb-3">
+                <label class="btn btn-s cursor-pointer"><input id="int-select-all" type="checkbox" onchange="toggleAllInterviews(this.checked)"> Select All</label>
                 <select id="bulk-status" class="p-2 rounded-xl border dark:bg-slate-700 dark:border-slate-600 text-xs">
                     <option value="">--STATUS--</option>
                     <option>PLANNED</option>
@@ -442,10 +436,10 @@
     <div id="toast" class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-[110] bg-slate-800 dark:bg-slate-100 text-white dark:text-slate-900 px-6 py-3 rounded-full shadow-lg text-sm font-medium toast"></div>
 
     <script>
-        const EMP_COLS = ["EMP ID", "PUCH ID", "Sr.No.", "Name", "Father's / Husband's Name", " Date Of Birth\nDD.MM.YYYY", "age", "Gender", " Marital Status", "LOC. ADD 1 \nhouse/flat/block no/name of the primises/buliding/village(at.:)", "LOC. ADD 2 \nroad/street/lane/post off.", "LOC. ADD 3\nArea/locality/Taluka/Sub-Div.", " LOC. ADD 4 \ntown/city/dist.", "LOC. ADD 5 \nP.Code.", "LOC. ADD 6\nstate/u.t.", "PRMT. ADD 1 \nhouse/flat/block no/name of the primises/buliding/village(at.:)", "PRMT. ADD 2 \nroad/street/lane/post off.", "PRMT. ADD 3\nArea/locality/Taluka/Sub-Div.", " PRMT. ADD 4 \ntown/city/dist.", "PRMT. ADD 5 \nP.Code.", "PRMT. ADD 6\nstate/u.t.", "D.O.J TRAINING\nDD.MM.YYYY", "END OF PROBATION", "NAME OF THE \nnominee 1", "RELATION\nNOMINEE # 1", "AGE/ \nNOMINEE # 1", "%", "MOTHER NAME", "RELATION", "MIMIMUM WAGES PER MONTH", "PF ACCOUNT", "REFRE.PERSON NAME-1", "Through Reference/DEPARTMENT NAME", "Name of Reference  Person", "See Vacancy on Notice Board", "MOBILE NUMBER", "BACK GROUND NAME-", "BACK GROUND NAME-MOBILE NUMBER", "which post/Relation", "BACK GROUND NAME-", "BACK GROUND NAME-MOBILE NUMBER", "which post/Relation", " RELIGION", "PLACE OF \nBIRTH", "HEIGHT (cm)", "IDENTIFICATON \nMARKS", " EDUCATIONAL QUALIFICATION", "Technical Qualification", " LIC /INSURANCEPOLICY #", "Contact # NUMBER OF EMPLOYEE", "Previous Employer Name  ", "Previous Employer ADDRESS", "Previous Designation  ", "Previous DEPARTMENT", "FROM Period", "TO Period", "wages/salary", "Reason of Leaving", "Category of Workman", "DESIGNATION", "BASIC", "CONVENIANCE", " HRA ", "EDUCATION      ALL", "PERFORMANCE ALL", "MED. ALL", "TOTAL GROSS", "DEPT. ", "DIVISION", "E.S.I.C. #", "EMPLOYEE CODE #", "REF. NAME 1  IN APPPLICATION FORM", "REF. ADD1", "REF. NAME 2 FOR APPLICATION FORM ", "COMPANY REF. NAME FULL ADDRES FOR APPLICATION FORM", "FATHER NAME /HUSBAND ", "D O B/AGE", "Relation ", "MOTHER /WIFE ", "D O B/AGE", "Relation ", "SPOUSE NAME", "D OB/AGE", "Relation ", "SON/DAUGHTER", "D OB/AGE", "Relation ", "CONTACT NUMBER OF WITNESS", "WITNESS 2  ADD", "BANK  ACCOUNT  OPEN", "TOTAL ADD LOCAL", "TOTAL ADD PERMAMENT", "Maternity Benefit", "INTERVIEW DATE", "FAZE 3 EMPLOYEE REFRE.NAME", "FAZE 3 EMPLOYEE REFRE.NAME MOBILE NUMBER", "PUNCHING ID", "AADHAR CARD NO", "PAN CARD NO", "PASSPORT NO."];
+        const EMP_COLS = ["EMP ID", "PUCH ID", "Sr.No.", "Name", "Father's / Husband's Name", " Date Of Birth\nDD.MM.YYYY", "age", "Gender", " Marital Status", "LOC. ADD 1 \nhouse/flat/block no/name of the primises/buliding/village(at.:)", "LOC. ADD 2 \nroad/street/lane/post off.", "LOC. ADD 3\nArea/locality/Taluka/Sub-Div.", " LOC. ADD 4 \ntown/city/dist.", "LOC. ADD 5 \nP.Code.", "LOC. ADD 6\nstate/u.t.", "PRMT. ADD 1 \nhouse/flat/block no/name of the primises/buliding/village(at.:)", "PRMT. ADD 2 \nroad/street/lane/post off.", "PRMT. ADD 3\nArea/locality/Taluka/Sub-Div.", " PRMT. ADD 4 \ntown/city/dist.", "PRMT. ADD 5 \nP.Code.", "PRMT. ADD 6\nstate/u.t.", "D.O.J TRAINING\nDD.MM.YYYY", "END OF PROBATION", "NAME OF THE \nnominee 1", "RELATION\nNOMINEE # 1", "AGE/ \nNOMINEE # 1", "%", "MOTHER NAME", "RELATION", "MIMIMUM WAGES PER MONTH", "PF ACCOUNT", "REFRE.PERSON NAME-1", "Through Reference/DEPARTMENT NAME", "Name of Reference  Person", "See Vacancy on Notice Board", "MOBILE NUMBER", "BACK GROUND NAME-", "BACK GROUND NAME-MOBILE NUMBER", "which post/Relation", "BACK GROUND NAME-", "BACK GROUND NAME-MOBILE NUMBER", "which post/Relation", " RELIGION", "PLACE OF \nBIRTH", "HEIGHT (cm)", "IDENTIFICATON \nMARKS", " EDUCATIONAL QUALIFICATION", "Technical Qualification", " LIC /INSURANCEPOLICY #", "Contact # NUMBER OF EMPLOYEE", "Previous Employer Name  ", "Previous Employer ADDRESS", "Previous Designation  ", "Previous DEPARTMENT", "FROM Period", "TO Period", "wages/salary", "Reason of Leaving", "Category of Workman", "DESIGNATION", "BASIC", "CONVENIANCE", " HRA ", "EDUCATION      ALL", "PERFORMANCE ALL", "MED. ALL", "TOTAL GROSS", "DEPT. ", "DIVISION", "E.S.I.C. #", "EMPLOYEE CODE #", "REF. NAME 1  IN APPPLICATION FORM", "REF. ADD1", "REF. NAME 2 FOR APPLICATION FORM ", "COMPANY REF. NAME FULL ADDRES FOR APPLICATION FORM", "FATHER NAME /HUSBAND ", "D O B/AGE", "Relation ", "MOTHER /WIFE ", "D O B/AGE", "Relation ", "SPOUSE NAME", "D OB/AGE", "Relation ", "SON/DAUGHTER", "D OB/AGE", "Relation ", "CONTACT NUMBER OF WITNESS", "WITNESS 2  ADD", "BANK  ACCOUNT  OPEN", "TOTAL ADD LOCAL", "TOTAL ADD PERMAMENT", "Maternity Benefit", "INTERVIEW DATE", "FAZE 3 EMPLOYEE REFRE.NAME", "FAZE 3 EMPLOYEE REFRE.NAME MOBILE NUMBER", "PUNCHING ID", "AADHAR CARD NO", "PAN CARD NO", "PASSPORT NO.", "EMAIL ID", "BANK ACCOUNT NUMBER", "IFSC CODE"];
         const INT_COLS = ["SR", "Candidate Name", "Department", "Qualification", "College/Institute", "Last/ Current Association", "Last designation hold", "Total Experience", "Current or Last Salary", "Expected Salary", "Notice period", "Remarks", "HR round", "mailed to head", "INTERVIEW DATE'", "OFFER LETTER", "JOINING DATE", "STATUS"];
         const EV = [['EMP ID', 0], ['NAME', 3], ['DOB', 5], ['CONFIRMATION', 22], ['CATEGORY', 58], ['DEPT', 67], ['DESIG', 59], ['GROSS', 66]];
-        const GROUPS = [['PERSONAL', [0, 1, 2, 3, 4, 5, 6, 7, 8, 42, 43, 44, 45, 46, 47, 48, 49, 50, 96, 97, 98]], ['ADDRESS', [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 90, 91]], ['PROFESSIONAL', [21, 22, 31, 32, 33, 34, 35, 51, 52, 53, 54, 55, 56, 57, 58, 59, 67, 68]], ['SALARY', [29, 30, 60, 61, 62, 63, 64, 65, 66, 69, 70]], ['FAMILY', [23, 24, 25, 26, 27, 28, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86]], ['OTHER', [36, 37, 38, 39, 40, 41, 71, 72, 73, 74, 87, 88, 89, 92, 93, 94, 95]]];
+        const GROUPS = [['PERSONAL', [0, 1, 2, 3, 4, 5, 6, 7, 8, 42, 43, 44, 45, 46, 47, 48, 49, 50, 97, 98, 99, 100]], ['ADDRESS', [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 90, 91]], ['PROFESSIONAL', [21, 22, 31, 32, 33, 34, 35, 51, 52, 53, 54, 55, 56, 57, 58, 59, 67, 68]], ['SALARY', [29, 30, 60, 61, 62, 63, 64, 65, 66, 69, 70]], ['FAMILY', [23, 24, 25, 26, 27, 28, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86]], ['OTHER', [36, 37, 38, 39, 40, 41, 71, 72, 73, 74, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 101, 102]]];
         
         let employees = [], interviews = [], trash = [], reminders = [], settings = { theme: 'light' }, empStep = 0, editEmpId = null, empDraft = null, pendingImport = null, empView = 'active', birthdayCategory = '', reminderInterviewIds = [];
         const DB = 'HRPRO_ULTIMATE_V9';
@@ -457,16 +451,15 @@
         }
 
         async function apiLoadData() {
-            const res = await fetch(CLOUD_API);
+            const res = await authFetch(CLOUD_API, {cache: 'no-store'});
             if (!res.ok) throw new Error('Cloud load failed');
             return await res.json();
         }
 
         async function apiSaveDataNow() {
             try {
-                const res = await fetch(CLOUD_API, {
+                const res = await authFetch(CLOUD_API, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(currentState())
                 });
                 if (!res.ok) throw new Error('Cloud save failed');
@@ -482,7 +475,15 @@
         }
 
         function U(v) { return String(v ?? '').trim().toUpperCase() }
-        function N(v) { return String(v || '').toLowerCase().replace(/\s+/g, ' ').replace(/[.#:/()']/g, '').trim() }
+        function N(v) {
+            return String(v ?? '').normalize('NFKC').replace(/\r?\n/g, ' ').replace(/[‐‑‒–—−]/g, '-')
+                .replace(/^\s*\d+\s*[.)-]\s*/, '').toLowerCase().replace(/\s+/g, ' ')
+                .replace(/[.#:/()']/g, '').replace(/\s*-\s*/g, ' - ').replace(/\s+/g, ' ').trim();
+        }
+        function findCandidateHeader(header, names) {
+            const wanted = (Array.isArray(names) ? names : [names]).map(N);
+            return header.findIndex(existing => wanted.includes(N(existing)));
+        }
         function p2(n) { return String(n).padStart(2, '0') }
         function xdate(v) {
             let n = Number(v);
@@ -560,198 +561,28 @@
                 document.getElementById('splash').classList.add('hide')
             }
         }
-
-        // ===== Secure pattern lock =====
-        // Important: this protects the UI of this static app. The server must still enforce
-        // authentication and authorization on /api/data because client-side code can be inspected.
-        const PATTERN_KEY = 'HRPRO_PATTERN_V1';
-        const PATTERN_ATTEMPT_KEY = 'HRPRO_PATTERN_ATTEMPTS_V1';
-        const PATTERN_ITERATIONS = 150000;
-        const PATTERN_MIN_POINTS = 4;
-        const PATTERN_IDLE_MS = 5 * 60 * 1000;
-        const PATTERN_HIDDEN_LOCK_MS = 30 * 1000;
-        let patternBooted = false, patternUnlocked = false, patternDrawing = false;
-        let patternSequence = [], patternConfirm = null, patternMode = 'unlock';
-        let patternIdleTimer = null, patternHiddenAt = 0;
-        const patternPoints = [
-            {id:1,x:55,y:55},{id:2,x:165,y:55},{id:3,x:275,y:55},
-            {id:4,x:55,y:165},{id:5,x:165,y:165},{id:6,x:275,y:165},
-            {id:7,x:55,y:275},{id:8,x:165,y:275},{id:9,x:275,y:275}
-        ];
-
-        function patternEls() {
-            return {
-                screen: document.getElementById('pattern-lock-screen'),
-                card: document.getElementById('pattern-lock-card'),
-                canvas: document.getElementById('pattern-canvas'),
-                title: document.getElementById('pattern-lock-title'),
-                subtitle: document.getElementById('pattern-lock-subtitle'),
-                message: document.getElementById('pattern-lock-message'),
-                cancel: document.getElementById('pattern-cancel-setup-btn')
-            };
-        }
-        function patternConfig() {
-            try { return JSON.parse(localStorage.getItem(PATTERN_KEY) || 'null'); } catch { return null; }
-        }
-        function bytesToB64(bytes) {
-            let s = ''; bytes.forEach(b => s += String.fromCharCode(b)); return btoa(s);
-        }
-        function b64ToBytes(s) {
-            return Uint8Array.from(atob(s), c => c.charCodeAt(0));
-        }
-        async function derivePattern(pattern, salt, iterations = PATTERN_ITERATIONS) {
-            const material = await crypto.subtle.importKey('raw', new TextEncoder().encode(pattern), 'PBKDF2', false, ['deriveBits']);
-            const bits = await crypto.subtle.deriveBits({name:'PBKDF2', hash:'SHA-256', salt, iterations}, material, 256);
-            return new Uint8Array(bits);
-        }
-        function constantTimeEqual(a, b) {
-            if (a.length !== b.length) return false;
-            let diff = 0; for (let i=0; i<a.length; i++) diff |= a[i] ^ b[i]; return diff === 0;
-        }
-        function getAttemptState() {
-            try { return {...{count:0, blockedUntil:0}, ...JSON.parse(localStorage.getItem(PATTERN_ATTEMPT_KEY) || '{}')}; }
-            catch { return {count:0, blockedUntil:0}; }
-        }
-        function setAttemptState(v) { localStorage.setItem(PATTERN_ATTEMPT_KEY, JSON.stringify(v)); }
-        function blockRemaining() { return Math.max(0, getAttemptState().blockedUntil - Date.now()); }
-        function blockedText(ms) { return 'Too many attempts. Try again in ' + Math.ceil(ms / 1000) + ' seconds.'; }
-
-        function drawPattern(pointer) {
-            const {canvas} = patternEls(); if (!canvas) return;
-            const ctx = canvas.getContext('2d'); ctx.clearRect(0,0,330,330);
-            if (patternSequence.length) {
-                ctx.beginPath();
-                patternSequence.forEach((id, i) => { const p=patternPoints[id-1]; i ? ctx.lineTo(p.x,p.y) : ctx.moveTo(p.x,p.y); });
-                if (pointer && patternDrawing) ctx.lineTo(pointer.x,pointer.y);
-                ctx.strokeStyle='#818cf8'; ctx.lineWidth=8; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.stroke();
-            }
-            patternPoints.forEach(p => {
-                const selected = patternSequence.includes(p.id);
-                ctx.beginPath(); ctx.arc(p.x,p.y,selected?18:14,0,Math.PI*2);
-                ctx.fillStyle=selected?'#a5b4fc':'#e2e8f0'; ctx.fill();
-                ctx.beginPath(); ctx.arc(p.x,p.y,selected?7:5,0,Math.PI*2);
-                ctx.fillStyle=selected?'#312e81':'#64748b'; ctx.fill();
-            });
-        }
-        function canvasPosition(ev) {
-            const c=patternEls().canvas, r=c.getBoundingClientRect();
-            return {x:(ev.clientX-r.left)*(c.width/r.width), y:(ev.clientY-r.top)*(c.height/r.height)};
-        }
-        function addPatternPoint(pos) {
-            const p=patternPoints.find(n => Math.hypot(n.x-pos.x,n.y-pos.y)<=30);
-            if (p && !patternSequence.includes(p.id)) patternSequence.push(p.id);
-        }
-        function clearPattern(message='') {
-            patternSequence=[]; patternDrawing=false; drawPattern();
-            patternEls().message.textContent=message;
-        }
-        function shakePattern() {
-            const card=patternEls().card; card.classList.remove('pattern-shake'); void card.offsetWidth; card.classList.add('pattern-shake');
-        }
-        function showPatternScreen(title, subtitle) {
-            const e=patternEls(); e.screen.classList.remove('unlocked'); e.title.textContent=title; e.subtitle.textContent=subtitle;
-            document.body.style.overflow='hidden'; clearPattern();
-        }
-        function hidePatternScreen() {
-            patternEls().screen.classList.add('unlocked'); document.body.style.overflow='';
-        }
-        async function saveNewPattern(pattern) {
-            const salt=crypto.getRandomValues(new Uint8Array(16));
-            const hash=await derivePattern(pattern,salt);
-            localStorage.setItem(PATTERN_KEY, JSON.stringify({version:1, algorithm:'PBKDF2-SHA-256', iterations:PATTERN_ITERATIONS, salt:bytesToB64(salt), hash:bytesToB64(hash)}));
-            setAttemptState({count:0,blockedUntil:0});
-        }
-        async function verifySavedPattern(pattern) {
-            const cfg=patternConfig(); if (!cfg) return false;
-            const actual=await derivePattern(pattern,b64ToBytes(cfg.salt),cfg.iterations);
-            return constantTimeEqual(actual,b64ToBytes(cfg.hash));
-        }
-        async function completePattern() {
-            if (!patternSequence.length) return;
-            const pattern=patternSequence.join('-'), e=patternEls();
-            const wait=blockRemaining();
-            if (patternMode==='unlock' && wait>0) { clearPattern(blockedText(wait)); return; }
-            if (patternSequence.length<PATTERN_MIN_POINTS) { shakePattern(); clearPattern('Use at least 4 different dots.'); return; }
-            if (patternMode==='setup' || patternMode==='changeNew') {
-                if (!patternConfirm) {
-                    patternConfirm=pattern; clearPattern('Draw the same pattern again to confirm.'); return;
-                }
-                if (pattern!==patternConfirm) { patternConfirm=null; shakePattern(); clearPattern('Patterns did not match. Start again.'); return; }
-                await saveNewPattern(pattern); patternConfirm=null; patternMode='unlock';
-                unlockPatternApp('Pattern saved.'); return;
-            }
-            if (patternMode==='changeVerify') {
-                if (await verifySavedPattern(pattern)) {
-                    patternMode='changeNew'; patternConfirm=null;
-                    e.title.textContent='Create New Pattern'; e.subtitle.textContent='Draw a new pattern using at least 4 dots.';
-                    clearPattern('Current pattern verified.');
-                } else { shakePattern(); clearPattern('Current pattern is incorrect.'); }
-                return;
-            }
-            if (await verifySavedPattern(pattern)) {
-                setAttemptState({count:0,blockedUntil:0}); unlockPatternApp();
-            } else {
-                let a=getAttemptState(); a.count=(a.count||0)+1;
-                if (a.count>=5) { const level=Math.min(4,Math.floor(a.count/5)-1); a.blockedUntil=Date.now()+30000*Math.pow(2,level); }
-                setAttemptState(a); shakePattern();
-                clearPattern(a.blockedUntil>Date.now()?blockedText(a.blockedUntil-Date.now()):'Incorrect pattern. '+(5-(a.count%5))+' attempt(s) before temporary lock.');
-            }
-        }
-        function unlockPatternApp(message='') {
-            patternUnlocked=true; hidePatternScreen(); resetPatternIdle();
-            if (!patternBooted) { patternBooted=true; boot(); }
-            if (message) setTimeout(() => toast(message.toUpperCase()), 250);
-        }
-        function lockPatternApp(reason='manual') {
-            if (!patternConfig()) return;
-            patternUnlocked=false; patternMode='unlock'; patternConfirm=null;
-            showPatternScreen('HRPro Locked', reason==='idle'?'Locked after 5 minutes of inactivity. Draw your pattern.':'Draw your pattern to unlock the app.');
-            const wait=blockRemaining(); if (wait) patternEls().message.textContent=blockedText(wait);
-        }
-        function beginPatternChange() {
-            if (!patternUnlocked) return;
-            if (!patternConfig()) { patternMode='setup'; showPatternScreen('Create Security Pattern','Use at least 4 dots, then repeat it.'); return; }
-            patternMode='changeVerify'; patternConfirm=null;
-            showPatternScreen('Verify Current Pattern','Draw your current pattern before setting a new one.');
-            patternEls().cancel.classList.remove('hidden');
-        }
-        function cancelPatternChange() {
-            patternEls().cancel.classList.add('hidden'); patternMode='unlock'; patternConfirm=null; unlockPatternApp();
-        }
-        function resetPatternIdle() {
-            if (!patternUnlocked) return; clearTimeout(patternIdleTimer);
-            patternIdleTimer=setTimeout(() => lockPatternApp('idle'),PATTERN_IDLE_MS);
-        }
-        function initializePatternLock() {
-            const e=patternEls(); drawPattern();
-            e.canvas.addEventListener('pointerdown', ev => {
-                if (blockRemaining() && patternMode==='unlock') { e.message.textContent=blockedText(blockRemaining()); return; }
-                patternDrawing=true; patternSequence=[]; e.canvas.setPointerCapture(ev.pointerId);
-                const pos=canvasPosition(ev); addPatternPoint(pos); drawPattern(pos); ev.preventDefault();
-            });
-            e.canvas.addEventListener('pointermove', ev => { if (!patternDrawing) return; const pos=canvasPosition(ev); addPatternPoint(pos); drawPattern(pos); ev.preventDefault(); });
-            e.canvas.addEventListener('pointerup', async ev => { if (!patternDrawing) return; patternDrawing=false; addPatternPoint(canvasPosition(ev)); drawPattern(); await completePattern(); });
-            e.canvas.addEventListener('pointercancel', () => clearPattern());
-            document.getElementById('pattern-clear-btn').addEventListener('click',()=>clearPattern());
-            e.cancel.addEventListener('click',cancelPatternChange);
-            const cfg=patternConfig();
-            if (!window.crypto || !crypto.subtle) {
-                e.title.textContent='Secure Context Required'; e.subtitle.textContent='Open this app through HTTPS or localhost to use secure pattern verification.';
-                e.message.textContent='Web Crypto is unavailable in this context.'; return;
-            }
-            if (!cfg) { patternMode='setup'; showPatternScreen('Create Security Pattern','First use: draw a pattern with at least 4 dots, then repeat it.'); }
-            else { patternMode='unlock'; showPatternScreen('HRPro Secure Access','Draw your pattern to unlock the app.'); const wait=blockRemaining(); if(wait)e.message.textContent=blockedText(wait); }
-            ['pointerdown','keydown','wheel','touchstart'].forEach(name => document.addEventListener(name,resetPatternIdle,{passive:true}));
-            document.addEventListener('visibilitychange',()=>{
-                if(document.hidden) patternHiddenAt=Date.now();
-                else if(patternUnlocked && patternHiddenAt && Date.now()-patternHiddenAt>=PATTERN_HIDDEN_LOCK_MS) lockPatternApp('idle');
-            });
-            window.addEventListener('blur',()=>{ patternHiddenAt=Date.now(); });
-        }
-        // ===== End secure pattern lock =====
-
-        document.addEventListener('DOMContentLoaded', initializePatternLock);
+document.addEventListener('DOMContentLoaded', initializeAuthentication);
         
+
+        // ===== Server-authenticated administrator login =====
+        let authenticatedUser = null, applicationBooted = false;
+        function setLoginMessage(m,ok=false){let e=document.getElementById('login-message');if(e){e.textContent=m||'';e.className='auth-message text-sm font-bold '+(ok?'text-emerald-300':'text-rose-300')}}
+        function setLoginBusy(b){let e=document.getElementById('login-button');if(!e)return;e.disabled=b;e.classList.toggle('opacity-60',b);e.innerHTML=b?'<i class="fa-solid fa-circle-notch auth-spinner mr-2"></i>Signing In...':'<i class="fa-solid fa-right-to-bracket mr-2"></i>Sign In'}
+        function togglePassword(id,b){let e=document.getElementById(id);if(!e)return;e.type=e.type==='password'?'text':'password';let i=b.querySelector('i');if(i)i.className=e.type==='password'?'fa-solid fa-eye':'fa-solid fa-eye-slash'}
+        function showLoginScreen(m=''){document.getElementById('login-screen').classList.remove('authenticated');document.body.style.overflow='hidden';setLoginMessage(m);setTimeout(()=>document.getElementById('login-username')?.focus(),80)}
+        function hideLoginScreen(){document.getElementById('login-screen').classList.add('authenticated');document.body.style.overflow=''}
+        function updateAuthenticatedUser(u){authenticatedUser=u||null;let e=document.getElementById('auth-user-name');if(e)e.textContent=authenticatedUser?.username||'Administrator'}
+        async function authFetch(url,opt={}){let r=await fetch(url,{...opt,credentials:'same-origin',headers:{...(opt.body?{'Content-Type':'application/json'}:{}),...(opt.headers||{})}});if(r.status===401){updateAuthenticatedUser(null);showLoginScreen('Your session has expired. Please sign in again.');throw new Error('Authentication required')}return r}
+        async function checkSession(){try{let r=await fetch('/api/auth/session',{credentials:'same-origin',cache:'no-store'});if(!r.ok)return false;let j=await r.json();if(!j.authenticated)return false;updateAuthenticatedUser(j.user);return true}catch(e){console.error('Session check failed:',e);return false}}
+        async function startAuthenticatedApplication(){hideLoginScreen();if(!applicationBooted){applicationBooted=true;await boot()}else{await load();applyTheme();renderAll()}}
+        async function initializeAuthentication(){document.getElementById('login-form').addEventListener('submit',loginAdmin);document.getElementById('password-form').addEventListener('submit',changeAdminPassword);if(await checkSession())await startAuthenticatedApplication();else showLoginScreen()}
+        async function loginAdmin(ev){ev.preventDefault();setLoginBusy(true);setLoginMessage('');try{let r=await fetch('/api/auth/login',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:document.getElementById('login-username').value.trim(),password:document.getElementById('login-password').value})});let j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.message||'Login failed');updateAuthenticatedUser(j.user);document.getElementById('login-password').value='';setLoginMessage('Login successful.',true);await startAuthenticatedApplication()}catch(e){setLoginMessage(e.message||'Login failed')}finally{setLoginBusy(false)}}
+        async function logoutAdmin(){try{await fetch('/api/auth/logout',{method:'POST',credentials:'same-origin'})}catch(e){console.warn(e)}updateAuthenticatedUser(null);closePasswordModal();document.getElementById('login-form').reset();showLoginScreen('Signed out successfully.')}
+        function openPasswordModal(){let m=document.getElementById('password-modal');document.getElementById('password-form').reset();document.getElementById('password-message').textContent='';m.classList.remove('hidden');m.classList.add('flex')}
+        function closePasswordModal(){let m=document.getElementById('password-modal');m.classList.add('hidden');m.classList.remove('flex')}
+        async function changeAdminPassword(ev){ev.preventDefault();let m=document.getElementById('password-message'),b=document.getElementById('password-submit');m.textContent='';b.disabled=true;try{let r=await authFetch('/api/auth/change-password',{method:'PUT',body:JSON.stringify({currentPassword:document.getElementById('current-password').value,newPassword:document.getElementById('new-password').value,confirmPassword:document.getElementById('confirm-password').value})});let j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.message||'Password change failed');m.className='auth-message text-sm font-bold text-emerald-600';m.textContent=j.message||'Password changed successfully';document.getElementById('password-form').reset();setTimeout(closePasswordModal,1200)}catch(e){m.className='auth-message text-sm font-bold text-rose-600';m.textContent=e.message||'Password change failed'}finally{b.disabled=false}}
+        // ===== End server-authenticated administrator login =====
+
         document.addEventListener('keydown', e => {
             if (e.key === 'PageDown') { e.preventDefault(); nextPage(1) }
             if (e.key === 'PageUp') { e.preventDefault(); nextPage(-1) }
@@ -1002,22 +833,57 @@
         const PERM_ADDR_IDX = [15, 16, 17, 18, 19, 20];
         const SALARY_PART_IDX = [60, 61, 62, 63, 64, 65];
         const GROSS_IDX = 66;
+        const DOJ_IDX = 21;
+        const PROBATION_IDX = 22;
+        const TOTAL_LOCAL_IDX = 90;
+        const TOTAL_PERM_IDX = 91;
         const PERSONAL_FATHER_IDX = 4;
         const FAMILY_FATHER_IDX = 75;
         function numVal(v) { let n = Number(String(v || '').replace(/,/g, '').trim()); return Number.isFinite(n) ? n : 0; }
         function moneyFmt(n) { return Number.isInteger(n) ? String(n) : n.toFixed(2).replace(/\.00$/, ''); }
+        function joinAddress(indexes) { return indexes.map(i => String(empDraft?.[i] || '').trim()).filter(Boolean).join(', '); }
+        function updateAddressTotals() {
+            if (!empDraft) return;
+            empDraft[TOTAL_LOCAL_IDX] = joinAddress(LOCAL_ADDR_IDX);
+            empDraft[TOTAL_PERM_IDX] = joinAddress(PERM_ADDR_IDX);
+            updateVisibleField(TOTAL_LOCAL_IDX, empDraft[TOTAL_LOCAL_IDX]);
+            updateVisibleField(TOTAL_PERM_IDX, empDraft[TOTAL_PERM_IDX]);
+        }
+        function formatDMYDate(d) { return p2(d.getDate()) + '/' + p2(d.getMonth() + 1) + '/' + d.getFullYear(); }
+        function parseFlexibleDMY(v) {
+            let x = String(v || '').trim().match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{4})$/);
+            if (!x) return null;
+            let d = new Date(+x[3], +x[2] - 1, +x[1]);
+            return d.getFullYear() === +x[3] && d.getMonth() === +x[2] - 1 && d.getDate() === +x[1] ? d : null;
+        }
+        function calcProbationEnd() {
+            if (!empDraft) return;
+            let doj = parseFlexibleDMY(empDraft[DOJ_IDX]);
+            if (!doj) { empDraft[PROBATION_IDX] = ''; updateVisibleField(PROBATION_IDX, ''); return; }
+            let base = new Date(doj.getFullYear(), doj.getMonth(), doj.getDate());
+            if (base.getDate() > 15) base = new Date(base.getFullYear(), base.getMonth() + 1, 1);
+            base.setMonth(base.getMonth() + 6);
+            empDraft[PROBATION_IDX] = formatDMYDate(base);
+            updateVisibleField(PROBATION_IDX, empDraft[PROBATION_IDX]);
+        }
+        function applyEmployeeDerived(arr) {
+            let old = empDraft; empDraft = arr;
+            updateAddressTotals(); calcProbationEnd();
+            empDraft = old;
+            return arr;
+        }
         function updateVisibleField(i, val) { let el = document.querySelector(`#emp-form [data-i="${i}"]`); if (el) el.value = val || ''; }
         function syncFather(src) { if (!empDraft) return; let dst = src === PERSONAL_FATHER_IDX ? FAMILY_FATHER_IDX : src === FAMILY_FATHER_IDX ? PERSONAL_FATHER_IDX : -1; if (dst < 0) return; empDraft[dst] = empDraft[src] || ''; updateVisibleField(dst, empDraft[dst]); }
-        function copyCurrentToPermanent(force) { if (!empDraft) return; let cb = document.getElementById('same-address'); if (!force && (!cb || !cb.checked)) return; LOCAL_ADDR_IDX.forEach((src, pos) => { let dst = PERM_ADDR_IDX[pos]; empDraft[dst] = empDraft[src] || ''; updateVisibleField(dst, empDraft[dst]); }); if (cb) cb.checked = true; }
+        function copyCurrentToPermanent(force) { if (!empDraft) return; let cb = document.getElementById('same-address'); if (!force && (!cb || !cb.checked)) return; LOCAL_ADDR_IDX.forEach((src, pos) => { let dst = PERM_ADDR_IDX[pos]; empDraft[dst] = empDraft[src] || ''; updateVisibleField(dst, empDraft[dst]); }); if (cb) cb.checked = true; updateAddressTotals(); }
         function calcGross() { if (!empDraft) return; let total = SALARY_PART_IDX.reduce((sum, i) => sum + numVal(empDraft[i]), 0); empDraft[GROSS_IDX] = total ? moneyFmt(total) : ''; updateVisibleField(GROSS_IDX, empDraft[GROSS_IDX]); }
-        function empFieldInput(el) { el.value = el.value.toUpperCase(); let i = +el.dataset.i; empDraft[i] = V(el.value, EMP_COLS, i); if (i === PERSONAL_FATHER_IDX || i === FAMILY_FATHER_IDX) syncFather(i); if (LOCAL_ADDR_IDX.includes(i)) copyCurrentToPermanent(false); if (SALARY_PART_IDX.includes(i)) calcGross(); }
-        function captureEmpForm() { if (!empDraft) empDraft = Array(EMP_COLS.length).fill(''); document.querySelectorAll('#emp-form [data-i]').forEach(x => empDraft[+x.dataset.i] = V(x.value, EMP_COLS, +x.dataset.i)); calcGross(); }
+        function empFieldInput(el) { el.value = el.value.toUpperCase(); let i = +el.dataset.i; empDraft[i] = V(el.value, EMP_COLS, i); if (i === PERSONAL_FATHER_IDX || i === FAMILY_FATHER_IDX) syncFather(i); if (LOCAL_ADDR_IDX.includes(i)) copyCurrentToPermanent(false); if (LOCAL_ADDR_IDX.includes(i) || PERM_ADDR_IDX.includes(i)) updateAddressTotals(); if (i === DOJ_IDX) calcProbationEnd(); if (SALARY_PART_IDX.includes(i)) calcGross(); }
+        function captureEmpForm() { if (!empDraft) empDraft = Array(EMP_COLS.length).fill(''); document.querySelectorAll('#emp-form [data-i]').forEach(x => empDraft[+x.dataset.i] = V(x.value, EMP_COLS, +x.dataset.i)); updateAddressTotals(); calcProbationEnd(); calcGross(); }
         function empGo(i) { captureEmpForm(); empStep = Math.max(0, Math.min(GROUPS.length - 1, i)); drawEmp(); }
         function sectionIcon(name) { return ({ PERSONAL: 'fa-user-tie', ADDRESS: 'fa-location-dot', PROFESSIONAL: 'fa-briefcase', SALARY: 'fa-indian-rupee-sign', FAMILY: 'fa-people-roof', OTHER: 'fa-folder-open' })[name] || 'fa-circle-info'; }
         function fieldIcon(i) { if ([3,4,27,75,78,81].includes(i)) return 'fa-user'; if (LOCAL_ADDR_IDX.includes(i) || PERM_ADDR_IDX.includes(i)) return 'fa-map-pin'; if (SALARY_PART_IDX.includes(i) || i === GROSS_IDX) return 'fa-indian-rupee-sign'; if (isDate(EMP_COLS, i)) return 'fa-calendar-days'; if (U(EMP_COLS[i]).includes('MOBILE') || U(EMP_COLS[i]).includes('CONTACT')) return 'fa-phone'; return 'fa-keyboard'; }
         function drawEmp() {
             if (!empDraft) { let e = editEmpId ? employees.find(x => x.id === editEmpId) : null; empDraft = e?.cols ? [...e.cols] : Array(EMP_COLS.length).fill(''); }
-            calcGross();
+            updateAddressTotals(); calcProbationEnd(); calcGross();
             let g = GROUPS[empStep];
             document.getElementById('emp-tabs').innerHTML = GROUPS.map((x, i) => `<button type=button onclick="empGo(${i})" class="emp-tab px-4 py-2 rounded-2xl text-xs font-black ${i === empStep ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/25' : 'bg-white/80 dark:bg-slate-800 text-slate-600 dark:text-slate-200'}"><span class="inline-flex h-6 w-6 items-center justify-center rounded-full ${i === empStep ? 'bg-white/20' : 'bg-indigo-50 dark:bg-slate-700'} mr-1"><i class="fa-solid ${sectionIcon(x[0])}"></i></span>${x[0]}</button>`).join('');
             let helper = g[0] === 'ADDRESS' ? `<div class="md:col-span-3 smart-check rounded-3xl p-4 flex flex-wrap items-center justify-between gap-3"><label class="inline-flex items-center gap-3 font-black text-sm"><input id="same-address" type="checkbox" onchange="copyCurrentToPermanent(true)" class="h-5 w-5 accent-indigo-600"> Permanent address same as current address</label><span class="text-xs text-slate-500 dark:text-slate-300"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i>Tick to copy Current Address fields into Permanent Address instantly.</span></div>` : '';
@@ -1054,6 +920,15 @@
             dept.innerHTML = '<option value="">ALL DEPARTMENTS</option>' + vals.map(v => `<option value="${E(v)}">${v}</option>`).join('');
             dept.value = vals.includes(cur) ? cur : '';
         }
+        function toggleAllInterviews(checked) {
+            document.querySelectorAll('.int-check').forEach(x => x.checked = checked);
+        }
+        function syncInterviewSelectAll() {
+            let all = [...document.querySelectorAll('.int-check')], box = document.getElementById('int-select-all');
+            if (!box) return;
+            box.checked = all.length > 0 && all.every(x => x.checked);
+            box.indeterminate = all.some(x => x.checked) && !box.checked;
+        }
         function clearIntFilters() {
             ['int-filter-dept', 'int-filter-color', 'int-filter-status'].forEach(id => { let x = document.getElementById(id); if (x) x.value = ''; });
             ['int-filter-hr', 'int-filter-exp', 'int-search'].forEach(id => { let x = document.getElementById(id); if (x) x.value = ''; });
@@ -1072,7 +947,8 @@
                 return (!q || i.cols.join(' ').includes(q)) && (!fDept || C(i, II.dept) === fDept) && (!fColor || (fColor === 'none' ? color === '' : color === fColor)) && (!fHr || C(i, 12).includes(fHr)) && (!fExp || C(i, 7).includes(fExp)) && (!fStatus || C(i, II.status) === fStatus);
             });
             let reversedRows = [...rows].reverse();
-            document.getElementById('int-stack').innerHTML = reversedRows.length ? reversedRows.map(i => `<div class="stack-card ${cardColorClass(i.cardColor)}"><div class="flex items-start">${cardColorButtons(i)}<div class="flex-1 min-w-0"><div class="flex justify-between gap-2 mb-3"><label><input class=int-check type=checkbox value="${i.id}"> <b>${C(i, II.name) || 'CANDIDATE'}</b></label><div><button onclick="openInt('${i.id}')" class=text-indigo-500><i class="fa-solid fa-pen"></i></button> <button onclick="del('int','${i.id}')" class=text-red-500><i class="fa-solid fa-trash-can"></i></button></div></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">${INT_COLS.map((c, x) => `<div><span class="text-slate-400 font-bold">${c}: </span><span>${C(i, x)}</span></div>`).join('')}</div></div></div></div>`).join('') : '<p class="p-8 text-center text-slate-400">NO INTERVIEWS MATCH FILTERS</p>'
+            let selectAllBox = document.getElementById('int-select-all'); if (selectAllBox) { selectAllBox.checked = false; selectAllBox.indeterminate = false; }
+            document.getElementById('int-stack').innerHTML = reversedRows.length ? reversedRows.map(i => `<div class="stack-card ${cardColorClass(i.cardColor)}"><div class="flex items-start">${cardColorButtons(i)}<div class="flex-1 min-w-0"><div class="flex justify-between gap-2 mb-3"><label><input class=int-check type=checkbox value="${i.id}" onchange="syncInterviewSelectAll()"> <b>${C(i, II.name) || 'CANDIDATE'}</b></label><div><button onclick="openInt('${i.id}')" class=text-indigo-500><i class="fa-solid fa-pen"></i></button> <button onclick="del('int','${i.id}')" class=text-red-500><i class="fa-solid fa-trash-can"></i></button></div></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">${INT_COLS.map((c, x) => `<div><span class="text-slate-400 font-bold">${c}: </span><span>${C(i, x)}</span></div>`).join('')}</div></div></div></div>`).join('') : '<p class="p-8 text-center text-slate-400">NO INTERVIEWS MATCH FILTERS</p>'
         }
 
         function openInt(id) {
@@ -1118,9 +994,9 @@
             ['Educational Qualification', 46, 'Text', 'No', ''],
             ['Technical Qualification', 47, 'Text', 'No', ''],
             ['Contact Number of Employee', 49, 'Text', 'No', 'Alternate contact if any'],
-            ['Aadhar Card No', 96, 'Text', 'Yes', ''],
-            ['PAN Card No', 97, 'Text', 'No', ''],
-            ['Passport No', 98, 'Text', 'No', ''],
+            ['Aadhar Card No', 97, 'Text', 'Yes', ''],
+            ['PAN Card No', 98, 'Text', 'No', ''],
+            ['Passport No', 99, 'Text', 'No', ''],
             ['Current Address 1 - House/Flat/Building/Village', 9, 'Text', 'Yes', ''],
             ['Current Address 2 - Road/Street/Post Office', 10, 'Text', 'No', ''],
             ['Current Address 3 - Area/Locality/Taluka', 11, 'Text', 'No', ''],
@@ -1140,14 +1016,14 @@
             ['Nominee 1 Percentage', 26, 'Text', 'No', ''],
             ['Mother Name', 27, 'Text', 'No', ''],
             ['Mother Relation', 28, 'Text', 'No', ''],
-            ['Previous Employer Name', 51, 'Text', 'No', ''],
-            ['Previous Employer Address', 52, 'Text', 'No', ''],
-            ['Previous Designation', 53, 'Text', 'No', ''],
-            ['Previous Department', 54, 'Text', 'No', ''],
-            ['From Period', 55, 'Text', 'No', ''],
-            ['To Period', 56, 'Text', 'No', ''],
-            ['Previous Wages/Salary', 57, 'Text', 'No', ''],
-            ['Reason of Leaving', 56, 'Text', 'No', ''],
+            ['Previous Employer Name', 50, 'Text', 'No', ''],
+            ['Previous Employer Address', 51, 'Text', 'No', ''],
+            ['Previous Designation', 52, 'Text', 'No', ''],
+            ['Previous Department', 53, 'Text', 'No', ''],
+            ['From Period', 54, 'Text', 'No', ''],
+            ['To Period', 55, 'Text', 'No', ''],
+            ['Previous Wages/Salary', 56, 'Text', 'No', ''],
+            ['Reason of Leaving', 57, 'Text', 'No', ''],
             ['Reference Person Name 1', 31, 'Text', 'No', ''],
             ['Reference Department Name', 32, 'Text', 'No', ''],
             ['Background Name 1', 36, 'Text', 'No', ''],
@@ -1158,7 +1034,10 @@
             ['Background Relation/Post 2', 41, 'Text', 'No', ''],
             ['Witness Contact Number', 87, 'Text', 'No', ''],
             ['Witness 2 Address', 88, 'Text', 'No', ''],
-            ['Bank Account Open', 89, 'Choice', 'No', 'YES / NO']
+            ['Bank Account Open', 89, 'Choice', 'No', 'YES / NO'],
+            ['EmailID', 100, 'Text', 'No', 'Candidate email address'],
+            ['Bank Account Number', 101, 'Text', 'No', 'Keep bank account numbers as text'],
+            ['IFSC Code', 102, 'Text', 'No', 'Bank branch IFSC code']
         ];
         function exportCandidateWordTemplate() {
             let sections = [
@@ -1190,32 +1069,52 @@
             if (!f) return;
             let r = new FileReader();
             r.onload = e => {
-                let wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
-                let aoa = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: '' });
+                let isCsv = /\.csv$/i.test(f.name), wb;
+                if (isCsv) {
+                    let bytes = new Uint8Array(e.target.result), csvText;
+                    try { csvText = new TextDecoder('windows-1252').decode(bytes); } catch { csvText = new TextDecoder('utf-8').decode(bytes); }
+                    wb = XLSX.read(csvText, { type: 'string', raw: true });
+                } else wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array', raw: true });
+                let aoa = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: '', raw: true });
                 if (!aoa.length) return toast('EMPTY FORM EXPORT');
-                let header = aoa[0].map(N);
+                let header = aoa[0];
+                let missingFields = CANDIDATE_FORM_MAP.filter(m => m[1] >= 0).filter(m => findCandidateHeader(header, m[0]) < 0).map(m => m[0]);
+                if (missingFields.length) console.warn('Candidate import fields not found:', missingFields);
                 let rows = aoa.slice(1).filter(row => !row.every(v => U(v) === ''));
                 let added = 0, updated = 0;
                 rows.forEach(row => {
                     let arr = Array(EMP_COLS.length).fill('');
                     CANDIDATE_FORM_MAP.forEach(m => {
                         if (m[1] < 0) return;
-                        let pos = header.findIndex(h => h === N(m[0]));
+                        let pos = findCandidateHeader(header, m[0]);
                         if (pos >= 0) arr[m[1]] = V(row[pos], EMP_COLS, m[1]);
                     });
-                    let samePos = header.findIndex(h => h === N('Permanent Address Same as Current'));
+                    let samePos = findCandidateHeader(header, 'Permanent Address Same as Current');
                     if (samePos >= 0 && ['YES', 'Y', 'TRUE', 'SAME'].includes(U(row[samePos]))) {
                         [9,10,11,12,13,14].forEach((src, ix) => arr[[15,16,17,18,19,20][ix]] = arr[src]);
                     }
+                    let bankOpenPos = findCandidateHeader(header, 'Bank Account Open');
+                    if (bankOpenPos >= 0) {
+                        let bankValue = U(row[bankOpenPos]), yesNoValues = ['YES','NO','Y','N','TRUE','FALSE'];
+                        if (bankValue && !yesNoValues.includes(bankValue)) { arr[101] = V(row[bankOpenPos], EMP_COLS, 101); arr[89] = ''; }
+                    }
+                    applyEmployeeDerived(arr);
                     if (arr[4] && !arr[75]) arr[75] = arr[4];
                     if (arr[75] && !arr[4]) arr[4] = arr[75];
                     let rec = se({ id: 'e_' + Date.now() + Math.random(), cols: arr, status: 'active' });
-                    let keyAadhar = C(rec, 96), keyPan = C(rec, 97), keyMobile = C(rec, 35), keyName = C(rec, EI.name);
-                    let k = employees.findIndex(x => (keyAadhar && C(x, 96) === keyAadhar) || (keyPan && C(x, 97) === keyPan) || (keyMobile && C(x, 35) === keyMobile && keyName && C(x, EI.name) === keyName));
+                    let keyAadhar = C(rec, 97), keyPan = C(rec, 98), keyMobile = C(rec, 35), keyName = C(rec, EI.name);
+                    let k = employees.findIndex(x => (keyAadhar && C(x, 97) === keyAadhar) || (keyPan && C(x, 98) === keyPan) || (keyMobile && C(x, 35) === keyMobile && keyName && C(x, EI.name) === keyName));
                     if (k >= 0) {
-                        rec.id = employees[k].id;
-                        rec.status = employees[k].status || 'active';
-                        rec.exitDate = employees[k].exitDate || '';
+                        let existing = employees[k];
+                        let existingCols = Array(EMP_COLS.length).fill('').map((_, i) => C(existing, i));
+                        if (arr[57] && U(existingCols[58]) === U(arr[57])) existingCols[58] = '';
+                        if (arr[52] && !arr[53] && U(existingCols[53]) === U(arr[52])) existingCols[53] = '';
+                        if (arr[97] && U(existingCols[96]) === U(arr[97])) existingCols[96] = '';
+                        if (arr[100] && U(existingCols[99]) === U(arr[100])) existingCols[99] = '';
+                        let mergedCols = Array(EMP_COLS.length).fill('');
+                        for (let i = 0; i < EMP_COLS.length; i++) mergedCols[i] = String(arr[i] ?? '').trim() !== '' ? arr[i] : existingCols[i];
+                        applyEmployeeDerived(mergedCols);
+                        rec = se({ ...existing, id: existing.id, cols: mergedCols, status: existing.status || 'active', exitDate: existing.exitDate || '' });
                         employees[k] = rec;
                         updated++;
                     } else {
