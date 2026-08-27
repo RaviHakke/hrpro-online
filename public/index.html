@@ -110,7 +110,6 @@
         .dark .master-table th:last-child, .dark .master-table td:last-child { background: #1e293b; }
         .master-table thead th:last-child { z-index: 9; background: #f8fafc; }
         .dark .master-table thead th:last-child { background: #0f172a; }
-25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
 
         /* Secure server-authenticated login */
         #login-screen { transition: opacity .25s ease, visibility .25s ease; }
@@ -127,16 +126,35 @@
 
     <div id="login-screen" class="fixed inset-0 z-[9999] bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="login-title">
       <div class="w-full max-w-md rounded-3xl border border-white/15 bg-white/10 backdrop-blur-xl shadow-2xl p-7 text-white">
-        <div class="text-center"><div class="mx-auto mb-4 h-16 w-16 rounded-2xl bg-indigo-500/25 flex items-center justify-center"><i class="fa-solid fa-shield-halved text-3xl text-indigo-300"></i></div><p class="text-[11px] font-black uppercase tracking-[.24em] text-indigo-300">Administrator Access</p><h1 id="login-title" class="mt-1 text-2xl font-black">Sign in to HRPro</h1><p class="mt-2 text-sm text-slate-300">Enter the administrator username and password.</p></div>
+        <div class="text-center"><div class="mx-auto mb-4 h-16 w-16 rounded-2xl bg-indigo-500/25 flex items-center justify-center"><i class="fa-solid fa-shield-halved text-3xl text-indigo-300"></i></div><p class="text-[11px] font-black uppercase tracking-[.24em] text-indigo-300">Secure Access</p><h1 id="login-title" class="mt-1 text-2xl font-black">Sign in to HRPro</h1><p class="mt-2 text-sm text-slate-300">Enter your assigned username and password.</p></div>
         <form id="login-form" class="mt-6 space-y-4" autocomplete="on">
-          <label class="block text-xs font-black text-slate-200">Username<input id="login-username" name="username" type="text" autocomplete="username" required maxlength="50" class="auth-input mt-1.5" placeholder="Administrator username"></label>
+          <label class="block text-xs font-black text-slate-200">Username<input id="login-username" name="username" type="text" autocomplete="username" required maxlength="50" class="auth-input mt-1.5" placeholder="Username"></label>
           <label class="block text-xs font-black text-slate-200">Password<div class="relative mt-1.5"><input id="login-password" name="password" type="password" autocomplete="current-password" required class="auth-input pr-12" placeholder="Password"><button type="button" onclick="togglePassword('login-password',this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500" aria-label="Show or hide password"><i class="fa-solid fa-eye"></i></button></div></label>
           <p id="login-message" class="auth-message text-sm font-bold text-rose-300" aria-live="polite"></p>
           <button id="login-button" type="submit" class="w-full rounded-2xl bg-indigo-500 hover:bg-indigo-400 px-4 py-3 font-black shadow-lg transition"><i class="fa-solid fa-right-to-bracket mr-2"></i>Sign In</button>
-        </form><p class="mt-5 text-center text-[11px] leading-4 text-slate-400">Password verification and HRPro data access are enforced by the server.</p>
+        </form><p class="mt-5 text-center text-[11px] leading-4 text-slate-400">Role permissions and data access are enforced by the server.</p>
       </div>
     </div>
-    <div id="password-modal" class="hidden fixed inset-0 z-[9998] bg-black/60 p-4 items-center justify-center"><div class="glass rounded-3xl shadow-2xl w-full max-w-md overflow-hidden"><div class="p-5 bg-gradient-to-r from-indigo-600 to-purple-700 text-white flex justify-between items-center"><div><p class="text-[10px] uppercase tracking-widest text-indigo-100 font-black">Administrator Only</p><b class="text-xl">Change Password</b></div><button type="button" onclick="closePasswordModal()" class="h-9 w-9 rounded-xl bg-white/15"><i class="fa-solid fa-xmark"></i></button></div><form id="password-form" class="p-5 space-y-4"><label class="block text-xs font-black">Current Password<input id="current-password" type="password" autocomplete="current-password" required class="auth-input mt-1.5 dark:bg-slate-800 dark:text-white"></label><label class="block text-xs font-black">New Password<input id="new-password" type="password" autocomplete="new-password" required minlength="10" class="auth-input mt-1.5 dark:bg-slate-800 dark:text-white"></label><label class="block text-xs font-black">Confirm New Password<input id="confirm-password" type="password" autocomplete="new-password" required minlength="10" class="auth-input mt-1.5 dark:bg-slate-800 dark:text-white"></label><p class="text-[11px] text-slate-500">Minimum 10 characters with uppercase, lowercase, and a number.</p><p id="password-message" class="auth-message text-sm font-bold text-rose-600" aria-live="polite"></p><div class="flex justify-end gap-2"><button type="button" onclick="closePasswordModal()" class="btn btn-s">Cancel</button><button id="password-submit" class="btn btn-i"><i class="fa-solid fa-key"></i>Change Password</button></div></form></div></div>
+    
+    <div id="password-modal" class="hidden fixed inset-0 z-[9998] bg-black/60 p-4 items-center justify-center">
+        <div class="glass rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div class="p-5 bg-gradient-to-r from-indigo-600 to-purple-700 text-white flex justify-between items-center">
+                <div>
+                    <p class="text-[10px] uppercase tracking-widest text-indigo-100 font-black">Account Security</p>
+                    <b class="text-xl">Change Password</b>
+                </div>
+                <button type="button" onclick="closePasswordModal()" class="h-9 w-9 rounded-xl bg-white/15"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="password-form" class="p-5 space-y-4">
+                <label class="block text-xs font-black">Current Password<input id="current-password" type="password" autocomplete="current-password" required class="auth-input mt-1.5 dark:bg-slate-800 dark:text-white"></label>
+                <label class="block text-xs font-black">New Password<input id="new-password" type="password" autocomplete="new-password" required minlength="8" class="auth-input mt-1.5 dark:bg-slate-800 dark:text-white"></label>
+                <label class="block text-xs font-black">Confirm New Password<input id="confirm-password" type="password" autocomplete="new-password" required minlength="8" class="auth-input mt-1.5 dark:bg-slate-800 dark:text-white"></label>
+                <p id="password-message" class="auth-message text-sm font-bold text-rose-600" aria-live="polite"></p>
+                <div class="flex justify-end gap-2"><button type="button" onclick="closePasswordModal()" class="btn btn-s">Cancel</button><button id="password-submit" class="btn btn-i"><i class="fa-solid fa-key"></i>Change Password</button></div>
+            </form>
+        </div>
+    </div>
+    
     <div id="splash" class="fixed inset-0 z-[99] bg-gradient-to-br from-indigo-600 to-indigo-900 flex flex-col items-center justify-center text-white">
         <div class="bg-white p-6 rounded-3xl shadow-2xl mb-7">
             <i class="fa-solid fa-users-gear text-6xl text-indigo-600"></i>
@@ -154,7 +172,7 @@
                 <button id="nav-employees" onclick="page('employees')" class="tab px-4 py-2 rounded-xl text-sm font-extrabold text-indigo-100">Employees</button>
                 <button id="nav-interviews" onclick="page('interviews')" class="tab px-4 py-2 rounded-xl text-sm font-extrabold text-indigo-100">Interviews</button>
             </nav>
-            <button onclick="openTrash()" class="relative bg-indigo-700 px-3 py-2 rounded-xl">
+            <button onclick="openTrash()" class="relative bg-indigo-700 px-3 py-2 rounded-xl" id="nav-trash-btn">
                 <i class="fa-solid fa-trash"></i>
                 <span id="trash-badge" class="hidden absolute -top-2 -right-2 bg-red-500 text-white text-[10px] rounded-full h-5 w-5 items-center justify-center"></span>
             </button>
@@ -163,12 +181,12 @@
 
     <div id="overlay" onclick="toggleSide()" class="hidden fixed inset-0 bg-black/40 z-50"></div>
 
-    <aside id="side" class="fixed z-50 inset-y-0 left-0 w-80 glass shadow-2xl p-5 transform -translate-x-full transition">
+    <aside id="side" class="fixed z-50 inset-y-0 left-0 w-80 glass shadow-2xl p-5 transform -translate-x-full transition overflow-y-auto">
         <div class="flex justify-between border-b dark:border-slate-700 pb-3 mb-5">
             <b><i class="fa-solid fa-gear text-indigo-500 mr-2"></i>Settings</b>
             <button onclick="toggleSide()"><i class="fa-solid fa-xmark"></i></button>
         </div>
-        <div class="space-y-4 text-sm">
+        <div class="space-y-4 text-sm" id="sidebar-admin-items">
             <label class="block cursor-pointer">
                 <i class="fa-solid fa-file-import text-emerald-500 mr-2"></i>Import Employee Excel
                 <input type="file" accept=".xls,.xlsx" class="hidden" onchange="startImport(event,'emp')">
@@ -213,10 +231,18 @@
                 <i class="fa-solid fa-upload text-emerald-500 mr-2"></i>Restore Backup
                 <input type="file" accept=".json" class="hidden" onchange="restore(event)">
             </label>
-
             <hr class="dark:border-slate-700">
-            <div class="rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 p-3"><div class="text-[10px] uppercase tracking-widest text-slate-400 font-black">Signed in as</div><div id="auth-user-name" class="mt-1 font-black text-indigo-700 dark:text-indigo-200">Administrator</div></div>
-            <div onclick="openPasswordModal()" class="cursor-pointer"><i class="fa-solid fa-key text-amber-500 mr-2"></i>Change Administrator Password</div><div onclick="createNewAccount()" class="cursor-pointer font-bold text-indigo-600 dark:text-indigo-300"><i class="fa-solid fa-user-plus mr-2"></i>Create New Account (Level 3 Only)</div>
+        </div>
+
+        <div class="space-y-4 text-sm mt-4">
+            <div class="rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 p-3">
+                <div class="text-[10px] uppercase tracking-widest text-slate-400 font-black">Signed in as</div>
+                <div id="auth-user-name" class="mt-1 font-black text-indigo-700 dark:text-indigo-200">User</div>
+            </div>
+            
+            <div onclick="openPasswordModal()" class="cursor-pointer"><i class="fa-solid fa-key text-amber-500 mr-2"></i>Change Password</div>
+            <div id="btn-create-account" onclick="createNewAccount()" class="cursor-pointer font-bold text-indigo-600 dark:text-indigo-300"><i class="fa-solid fa-user-plus mr-2"></i>Create New Account</div>
+            <div onclick="logoutAdmin()" class="cursor-pointer text-red-600 dark:text-red-300"><i class="fa-solid fa-right-from-bracket mr-2"></i>Sign Out</div>
             <label><input type="checkbox" id="dark" onchange="darkMode()"> Dark Mode</label>
         </div>
     </aside>
@@ -272,13 +298,14 @@
                         <option value="">ALL CATEGORIES</option>
                     </select>
                     <button onclick="clearEmpFilters()" class="btn btn-s"><i class="fa-solid fa-filter-circle-xmark"></i> Clear</button>
-                    <button onclick="exportCandidateWordTemplate()" class="btn bg-purple-600 text-white"><i class="fa-solid fa-file-word"></i> MS Form Word</button>
-                    <label class="btn bg-pink-600 text-white cursor-pointer"><i class="fa-solid fa-cloud-arrow-up"></i> Import Form Export<input type="file" accept=".xls,.xlsx,.csv" class="hidden" onchange="importCandidateFormExport(event)"></label>
-                    <label class="btn btn-e cursor-pointer">
+                    <button onclick="exportCandidateWordTemplate()" class="btn bg-purple-600 text-white act-btn"><i class="fa-solid fa-file-word"></i> MS Form Word</button>
+                    
+                    <label class="btn bg-pink-600 text-white cursor-pointer act-btn"><i class="fa-solid fa-cloud-arrow-up"></i> Import Form Export<input type="file" accept=".xls,.xlsx,.csv" class="hidden" onchange="importCandidateFormExport(event)"></label>
+                    <label class="btn btn-e cursor-pointer act-btn">
                         Import<input type="file" accept=".xls,.xlsx" class="hidden" onchange="startImport(event,'emp')">
                     </label>
-                    <button onclick="exportSelectedOrAll('emp',true)" class="btn btn-s">Export Selected</button>
-                    <button onclick="openEmp()" class="btn btn-i">Add</button>
+                    <button onclick="exportSelectedOrAll('emp',true)" class="btn btn-s act-btn">Export Selected</button>
+                    <button onclick="openEmp()" class="btn btn-i act-btn">Add</button>
                 </div>
             </div>
             <div class="flex flex-wrap justify-between gap-2 mb-3">
@@ -287,9 +314,9 @@
                     <button id="emp-tab-inactive" onclick="setEmpView('inactive')" class="btn btn-s"><i class="fa-solid fa-user-slash"></i> Inactive Employees</button>
                 </div>
                 <div class="flex gap-2">
-                    <button id="emp-inactivate-btn" onclick="moveSelectedInactive()" class="btn bg-amber-500 text-white"><i class="fa-solid fa-user-minus"></i> Add Selected to Inactive</button>
-                    <button id="emp-activate-btn" onclick="moveSelectedActive()" class="hidden btn bg-emerald-600 text-white"><i class="fa-solid fa-user-plus"></i> Move Selected to Active</button>
-                    <button onclick="bulkDelete('emp')" class="btn btn-r">Delete Selected</button>
+                    <button id="emp-inactivate-btn" onclick="moveSelectedInactive()" class="btn bg-amber-500 text-white act-btn"><i class="fa-solid fa-user-minus"></i> Add Selected to Inactive</button>
+                    <button id="emp-activate-btn" onclick="moveSelectedActive()" class="hidden btn bg-emerald-600 text-white act-btn"><i class="fa-solid fa-user-plus"></i> Move Selected to Active</button>
+                    <button onclick="bulkDelete('emp')" class="btn btn-r act-btn">Delete Selected</button>
                 </div>
             </div>
             <div id="emp-category-summary" class="flex flex-wrap gap-2 mb-3"></div>
@@ -313,11 +340,11 @@
                 </div>
                 <div class="flex gap-2 flex-wrap">
                     <input id="int-search" oninput="renderInt()" placeholder="SEARCH" class="p-2 rounded-xl border dark:bg-slate-700 dark:border-slate-600 uppercase">
-                    <label class="btn btn-e cursor-pointer">
+                    <label class="btn btn-e cursor-pointer act-btn">
                         Import<input type="file" accept=".xls,.xlsx" class="hidden" onchange="startImport(event,'int')">
                     </label>
-                    <button onclick="exportSelectedOrAll('int',true)" class="btn btn-s">Export Selected</button>
-                    <button onclick="openInt()" class="btn btn-e">Add</button>
+                    <button onclick="exportSelectedOrAll('int',true)" class="btn btn-s act-btn">Export Selected</button>
+                    <button onclick="openInt()" class="btn btn-e act-btn">Add</button>
                 </div>
             </div>
             <div class="flex flex-wrap gap-2 mb-3 p-3 rounded-2xl bg-slate-50/80 dark:bg-slate-900/30 border dark:border-slate-700">
@@ -348,7 +375,7 @@
             </div>
             <div class="flex flex-wrap gap-2 mb-3">
                 <label class="btn btn-s cursor-pointer"><input id="int-select-all" type="checkbox" onchange="toggleAllInterviews(this.checked)"> Select All</label>
-                <select id="bulk-status" class="p-2 rounded-xl border dark:bg-slate-700 dark:border-slate-600 text-xs">
+                <select id="bulk-status" class="p-2 rounded-xl border dark:bg-slate-700 dark:border-slate-600 text-xs act-btn">
                     <option value="">--STATUS--</option>
                     <option>PLANNED</option>
                     <option>DONE</option>
@@ -357,10 +384,10 @@
                     <option>ON HOLD</option>
                     <option>JOINED</option>
                 </select>
-                <button onclick="bulkStatus()" class="btn btn-i">Update Selected</button>
-                <button onclick="emailReport(false)" class="btn btn-e">Email Selected Table</button>
-                <button onclick="openReminder()" class="btn bg-purple-600 text-white"><i class="fa-solid fa-bell"></i> Set Reminder</button>
-                <button onclick="bulkDelete('int')" class="btn btn-r">Delete Selected</button>
+                <button onclick="bulkStatus()" class="btn btn-i act-btn">Update Selected</button>
+                <button onclick="emailReport(false)" class="btn btn-e act-btn">Email Selected Table</button>
+                <button onclick="openReminder()" class="btn bg-purple-600 text-white act-btn"><i class="fa-solid fa-bell"></i> Set Reminder</button>
+                <button onclick="bulkDelete('int')" class="btn btn-r act-btn">Delete Selected</button>
             </div>
             <div id="int-stack" class="grid grid-cols-1 lg:grid-cols-2 gap-4"></div>
         </section>
@@ -385,7 +412,7 @@
         <div class="glass rounded-3xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col">
             <div class="p-4 border-b dark:border-slate-700 flex justify-between">
                 <b>Interview Entry</b>
-                <button onclick="closeInt()"><i class="fa-solid fa-xmark"></i></button>
+                <button type="button" onclick="closeInt()"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <form id="int-form" onsubmit="saveInt(event)" class="p-5 grid grid-cols-1 md:grid-cols-3 gap-4 overflow-y-auto scroll"></form>
         </div>
@@ -399,7 +426,7 @@
             </div>
             <div id="trash-list" class="p-4 overflow-y-auto scroll"></div>
             <div class="p-4 text-right border-t dark:border-slate-700">
-                <button onclick="emptyTrash()" class="btn btn-r">Empty Trash Permanently</button>
+                <button onclick="emptyTrash()" class="btn btn-r act-btn">Empty Trash Permanently</button>
             </div>
         </div>
     </div>
@@ -412,7 +439,7 @@
             </div>
             <div id="import-body" class="p-4 overflow-y-auto scroll"></div>
             <div class="p-4 border-t dark:border-slate-700 text-right">
-                <button onclick="confirmImport()" class="btn btn-e">Import Selected</button>
+                <button onclick="confirmImport()" class="btn btn-e act-btn">Import Selected</button>
             </div>
         </div>
     </div>
@@ -428,7 +455,7 @@
                 <label class="block text-xs font-bold">Reminder Date<input id="reminder-date" type="date" required class="mt-1 w-full p-2 rounded-xl border dark:bg-slate-700 dark:border-slate-600"></label>
                 <label class="block text-xs font-bold">Reminder Time<input id="reminder-time" type="time" required class="mt-1 w-full p-2 rounded-xl border dark:bg-slate-700 dark:border-slate-600"></label>
                 <label class="block text-xs font-bold">Message<input id="reminder-message" placeholder="INTERVIEW REMINDER" class="mt-1 w-full p-2 rounded-xl border dark:bg-slate-700 dark:border-slate-600 uppercase"></label>
-                <div class="text-right"><button type="button" onclick="closeReminder()" class="btn btn-s">Cancel</button> <button class="btn bg-purple-600 text-white">Save Reminder</button></div>
+                <div class="text-right"><button type="button" onclick="closeReminder()" class="btn btn-s">Cancel</button> <button class="btn bg-purple-600 text-white act-btn">Save Reminder</button></div>
             </form>
         </div>
     </div>
@@ -457,6 +484,9 @@
 
         async function apiSaveDataNow() {
             try {
+                // If user is not Level 3, don't even try to save to cloud to prevent unnecessary API errors
+                if (authenticatedUser && authenticatedUser.level < 3) return;
+
                 const res = await authFetch(CLOUD_API, {
                     method: 'PUT',
                     body: JSON.stringify(currentState())
@@ -560,11 +590,30 @@
                 document.getElementById('splash').classList.add('hide')
             }
         }
-document.addEventListener('DOMContentLoaded', initializeAuthentication);
+        document.addEventListener('DOMContentLoaded', initializeAuthentication);
         
 
-        // ===== Server-authenticated administrator login =====
-      async function startAuthenticatedApplication(){
+        // ===== Server-authenticated administrator login with RBAC =====
+        let authenticatedUser = null, applicationBooted = false;
+        function setLoginMessage(m,ok=false){let e=document.getElementById('login-message');if(e){e.textContent=m||'';e.className='auth-message text-sm font-bold '+(ok?'text-emerald-300':'text-rose-300')}}
+        function setLoginBusy(b){let e=document.getElementById('login-button');if(!e)return;e.disabled=b;e.classList.toggle('opacity-60',b);e.innerHTML=b?'<i class="fa-solid fa-circle-notch auth-spinner mr-2"></i>Signing In...':'<i class="fa-solid fa-right-to-bracket mr-2"></i>Sign In'}
+        function togglePassword(id,b){let e=document.getElementById(id);if(!e)return;e.type=e.type==='password'?'text':'password';let i=b.querySelector('i');if(i)i.className=e.type==='password'?'fa-solid fa-eye':'fa-solid fa-eye-slash'}
+        function showLoginScreen(m=''){document.getElementById('login-screen').classList.remove('authenticated');document.body.style.overflow='hidden';setLoginMessage(m);setTimeout(()=>document.getElementById('login-username')?.focus(),80)}
+        function hideLoginScreen(){document.getElementById('login-screen').classList.add('authenticated');document.body.style.overflow=''}
+        
+        function updateAuthenticatedUser(u){
+            authenticatedUser=u||null;
+            let e=document.getElementById('auth-user-name');
+            if(e) {
+                let lvlName = authenticatedUser?.level === 3 ? '(Super Admin)' : (authenticatedUser?.level === 1 ? '(Interview Reader)' : '(Full Reader)');
+                e.textContent = (authenticatedUser?.username||'User') + ' ' + lvlName;
+            }
+        }
+        
+        async function authFetch(url,opt={}){let r=await fetch(url,{...opt,credentials:'same-origin',headers:{...(opt.body?{'Content-Type':'application/json'}:{}),...(opt.headers||{})}});if(r.status===401){updateAuthenticatedUser(null);showLoginScreen('Your session has expired. Please sign in again.');throw new Error('Authentication required')}return r}
+        async function checkSession(){try{let r=await fetch('/api/auth/session',{credentials:'same-origin',cache:'no-store'});if(!r.ok)return false;let j=await r.json();if(!j.authenticated)return false;updateAuthenticatedUser(j.user);return true}catch(e){console.error('Session check failed:',e);return false}}
+        
+        async function startAuthenticatedApplication(){
             hideLoginScreen();
             if(!applicationBooted){
                 applicationBooted=true;
@@ -591,31 +640,52 @@ document.addEventListener('DOMContentLoaded', initializeAuthentication);
                 document.getElementById('nav-employees').style.display = '';
             }
 
-            // LEVEL 1 & 2: Hide all editing/saving capabilities
+            // LEVEL 1 & 2: Hide all editing/saving/deleting capabilities
             if (lvl < 3) {
-                // Find all action buttons (Add, Edit, Delete, Import, Save)
+                // Find all action buttons explicitly marked with 'act-btn' and standard dynamic edits
                 const actionButtons = document.querySelectorAll(`
-                    button[onclick*="openEmp"], button[onclick*="del("], 
-                    button[onclick*="openInt"], button[onclick*="bulkDelete"], 
-                    label:has(input[type="file"]), button:has(.fa-floppy-disk), 
-                    button[onclick*="emptyTrash"], button[onclick*="bulkStatus"]
+                    .act-btn, button[onclick*="openEmp"], button[onclick*="openInt"], 
+                    button[onclick*="del("], button[onclick*="bulkDelete"]
                 `);
                 
                 actionButtons.forEach(btn => {
-                    // Use !important to override tailwind classes
-                    btn.style.setProperty('display', 'none', 'important');
+                    if(btn) btn.style.setProperty('display', 'none', 'important');
                 });
+                
+                // Hide file inputs used for import/restore
+                document.querySelectorAll('input[type="file"]').forEach(inp => {
+                    const parent = inp.closest('label');
+                    if(parent) parent.style.setProperty('display', 'none', 'important');
+                });
+
+                // Hide sidebar admin items container entirely to prevent backup/restore/exports
+                const sidebarAdminGroup = document.getElementById('sidebar-admin-items');
+                if (sidebarAdminGroup) sidebarAdminGroup.style.setProperty('display', 'none', 'important');
+                
+                // Hide trash button from header
+                const trashBtn = document.getElementById('nav-trash-btn');
+                if (trashBtn) trashBtn.style.setProperty('display', 'none', 'important');
+
+                // Hide create account button
+                const createAcctBtn = document.getElementById('btn-create-account');
+                if (createAcctBtn) createAcctBtn.style.setProperty('display', 'none', 'important');
+            } else {
+                // Restore visibility for Super Admins in case they re-login in same session
+                const createAcctBtn = document.getElementById('btn-create-account');
+                if (createAcctBtn) createAcctBtn.style.setProperty('display', 'block');
+                
+                const sidebarAdminGroup = document.getElementById('sidebar-admin-items');
+                if (sidebarAdminGroup) sidebarAdminGroup.style.setProperty('display', 'block');
             }
         }
 
-        // Feature for Super Admin to create new accounts from the UI
         async function createNewAccount() {
             if (!authenticatedUser || authenticatedUser.level !== 3) {
                 return alert('Only Super Admins (Level 3) can create accounts.');
             }
             let user = prompt('Enter NEW Username:');
             if (!user) return;
-            let pass = prompt('Enter NEW Password:');
+            let pass = prompt('Enter NEW Password (min 8 chars):');
             if (!pass) return;
             let lvl = prompt('Enter Access Level:\n1 = Read Interviews Only\n2 = Read All Pages\n3 = Super Admin (Full Edit)');
             if (!lvl || ![1,2,3].includes(Number(lvl))) return alert('Invalid level entered. Setup cancelled.');
@@ -631,7 +701,14 @@ document.addEventListener('DOMContentLoaded', initializeAuthentication);
                 alert('Error: ' + e.message);
             }
         }
- // ===== End server-authenticated administrator login =====
+
+        async function initializeAuthentication(){document.getElementById('login-form').addEventListener('submit',loginAdmin);document.getElementById('password-form').addEventListener('submit',changeAdminPassword);if(await checkSession())await startAuthenticatedApplication();else showLoginScreen()}
+        async function loginAdmin(ev){ev.preventDefault();setLoginBusy(true);setLoginMessage('');try{let r=await fetch('/api/auth/login',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:document.getElementById('login-username').value.trim(),password:document.getElementById('login-password').value})});let j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.message||'Login failed');updateAuthenticatedUser(j.user);document.getElementById('login-password').value='';setLoginMessage('Login successful.',true);await startAuthenticatedApplication()}catch(e){setLoginMessage(e.message||'Login failed')}finally{setLoginBusy(false)}}
+        async function logoutAdmin(){try{await fetch('/api/auth/logout',{method:'POST',credentials:'same-origin'})}catch(e){console.warn(e)}updateAuthenticatedUser(null);closePasswordModal();document.getElementById('login-form').reset();showLoginScreen('Signed out successfully.')}
+        function openPasswordModal(){let m=document.getElementById('password-modal');document.getElementById('password-form').reset();document.getElementById('password-message').textContent='';m.classList.remove('hidden');m.classList.add('flex')}
+        function closePasswordModal(){let m=document.getElementById('password-modal');m.classList.add('hidden');m.classList.remove('flex')}
+        async function changeAdminPassword(ev){ev.preventDefault();let m=document.getElementById('password-message'),b=document.getElementById('password-submit');m.textContent='';b.disabled=true;try{let r=await authFetch('/api/auth/change-password',{method:'PUT',body:JSON.stringify({currentPassword:document.getElementById('current-password').value,newPassword:document.getElementById('new-password').value,confirmPassword:document.getElementById('confirm-password').value})});let j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.message||'Password change failed');m.className='auth-message text-sm font-bold text-emerald-600';m.textContent=j.message||'Password changed successfully';document.getElementById('password-form').reset();setTimeout(closePasswordModal,1200)}catch(e){m.className='auth-message text-sm font-bold text-rose-600';m.textContent=e.message||'Password change failed'}finally{b.disabled=false}}
+        // ===== End server-authenticated login =====
 
         document.addEventListener('keydown', e => {
             if (e.key === 'PageDown') { e.preventDefault(); nextPage(1) }
@@ -640,6 +717,10 @@ document.addEventListener('DOMContentLoaded', initializeAuthentication);
 
         function nextPage(d) {
             let pages = ['dashboard', 'employees', 'interviews'];
+            
+            // Restrict navigation for Level 1 users using keyboard
+            if (authenticatedUser && authenticatedUser.level === 1) pages = ['interviews'];
+
             let cur = pages.findIndex(p => !document.getElementById('page-' + p).classList.contains('hidden'));
             page(pages[(cur + d + pages.length) % pages.length])
         }
@@ -669,6 +750,11 @@ document.addEventListener('DOMContentLoaded', initializeAuthentication);
         }
 
         function page(p) {
+            // Prevent Level 1 from navigating away from Interviews
+            if (authenticatedUser && authenticatedUser.level === 1 && p !== 'interviews') {
+                p = 'interviews';
+            }
+
             ['dashboard', 'employees', 'interviews'].forEach(x => {
                 document.getElementById('page-' + x).classList.toggle('hidden', x !== p);
                 document.getElementById('nav-' + x).className = 'tab px-4 py-2 rounded-xl text-sm font-extrabold ' + (x === p ? 'bg-white dark:bg-slate-700 text-indigo-700 dark:text-white' : 'text-indigo-100')
@@ -828,7 +914,11 @@ document.addEventListener('DOMContentLoaded', initializeAuthentication);
             }
             let head = '<th class=p-3><input type=checkbox onchange="toggleAll(\'.emp-check\',this.checked)"></th>' + EV.map(v => `<th class="p-3 th">${v[0]}</th>`).join('') + (empView === 'inactive' ? '<th class=p-3>Date of Exit</th>' : '') + '<th class=p-3>Action</th>';
             document.getElementById('emp-head').innerHTML = head;
-            document.getElementById('emp-body').innerHTML = rows.length ? rows.map(e => `<tr class="border-t dark:border-slate-700"><td class=p-3><input class=emp-check type=checkbox value="${e.id}"></td>${EV.map(v => `<td class="p-3 whitespace-nowrap ${v[1] === EI.name ? 'font-bold' : ''}">${C(e, v[1])}</td>`).join('')}${empView === 'inactive' ? `<td class=p-3>${e.exitDate || ''}</td>` : ''}<td class=p-3><button onclick="openEmp('${e.id}')" class=text-indigo-500><i class="fa-solid fa-pen"></i></button> <button onclick="del('emp','${e.id}')" class=text-red-500><i class="fa-solid fa-trash-can"></i></button></td></tr>`).join('') : `<tr><td colspan=12 class="p-8 text-center text-slate-400">NO ${empView.toUpperCase()} EMPLOYEES</td></tr>`;
+            
+            // Only show Action Buttons if Super Admin
+            const canEdit = authenticatedUser && authenticatedUser.level === 3;
+            
+            document.getElementById('emp-body').innerHTML = rows.length ? rows.map(e => `<tr class="border-t dark:border-slate-700"><td class=p-3><input class=emp-check type=checkbox value="${e.id}"></td>${EV.map(v => `<td class="p-3 whitespace-nowrap ${v[1] === EI.name ? 'font-bold' : ''}">${C(e, v[1])}</td>`).join('')}${empView === 'inactive' ? `<td class=p-3>${e.exitDate || ''}</td>` : ''}<td class=p-3>${canEdit ? `<button onclick="openEmp('${e.id}')" class=text-indigo-500><i class="fa-solid fa-pen"></i></button> <button onclick="del('emp','${e.id}')" class=text-red-500><i class="fa-solid fa-trash-can"></i></button>` : `<i class="fa-solid fa-lock text-slate-300" title="Read Only"></i>`}</td></tr>`).join('') : `<tr><td colspan=12 class="p-8 text-center text-slate-400">NO ${empView.toUpperCase()} EMPLOYEES</td></tr>`;
         }
         function moveSelectedInactive() {
             let ids = selectedIds('.emp-check');
@@ -960,6 +1050,7 @@ document.addEventListener('DOMContentLoaded', initializeAuthentication);
         }
         function colorDot(id, color, label, cls) { return `<button title="${label}" onclick="setCardColor('${id}','${color}')" class="h-6 w-6 rounded-full border-2 border-white shadow ${cls}"></button>` }
         function cardColorButtons(i) {
+            if (authenticatedUser && authenticatedUser.level < 3) return `<div class="shrink-0 pr-3 mr-3 border-r dark:border-slate-600"><div class="h-8 w-8 rounded-full border-2 shadow ${selectedColorClass(i.cardColor)}"></div></div>`;
             return `<div class="relative group shrink-0 pr-3 mr-3 border-r dark:border-slate-600"><button title="Choose card colour" class="h-8 w-8 rounded-full border-2 shadow ${selectedColorClass(i.cardColor)}"></button><div class="hidden group-hover:flex hover:flex absolute left-10 top-0 z-20 flex-col gap-2 p-2 rounded-2xl bg-white dark:bg-slate-800 border dark:border-slate-600 shadow-xl">${colorDot(i.id,'green','Green','bg-emerald-500')}${colorDot(i.id,'blue','Blue','bg-blue-500')}${colorDot(i.id,'red','Red','bg-red-500')}${colorDot(i.id,'yellow','Yellow','bg-amber-400')}${colorDot(i.id,'purple','Purple','bg-purple-500')}<button title="Clear" onclick="setCardColor('${i.id}','')" class="h-6 w-6 rounded-full bg-slate-100 dark:bg-slate-700 text-[10px] font-black shadow">X</button></div></div>`
         }
         function setCardColor(id, color) { let i = interviews.find(x => x.id === id); if (!i) return; i.cardColor = color; save(); fillIntFilterOptions(); renderInt(); toast(color ? 'CARD COLOUR UPDATED' : 'CARD COLOUR CLEARED') }
@@ -998,7 +1089,8 @@ document.addEventListener('DOMContentLoaded', initializeAuthentication);
             });
             let reversedRows = [...rows].reverse();
             let selectAllBox = document.getElementById('int-select-all'); if (selectAllBox) { selectAllBox.checked = false; selectAllBox.indeterminate = false; }
-            document.getElementById('int-stack').innerHTML = reversedRows.length ? reversedRows.map(i => `<div class="stack-card ${cardColorClass(i.cardColor)}"><div class="flex items-start">${cardColorButtons(i)}<div class="flex-1 min-w-0"><div class="flex justify-between gap-2 mb-3"><label><input class=int-check type=checkbox value="${i.id}" onchange="syncInterviewSelectAll()"> <b>${C(i, II.name) || 'CANDIDATE'}</b></label><div><button onclick="openInt('${i.id}')" class=text-indigo-500><i class="fa-solid fa-pen"></i></button> <button onclick="del('int','${i.id}')" class=text-red-500><i class="fa-solid fa-trash-can"></i></button></div></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">${INT_COLS.map((c, x) => `<div><span class="text-slate-400 font-bold">${c}: </span><span>${C(i, x)}</span></div>`).join('')}</div></div></div></div>`).join('') : '<p class="p-8 text-center text-slate-400">NO INTERVIEWS MATCH FILTERS</p>'
+            const canEdit = authenticatedUser && authenticatedUser.level === 3;
+            document.getElementById('int-stack').innerHTML = reversedRows.length ? reversedRows.map(i => `<div class="stack-card ${cardColorClass(i.cardColor)}"><div class="flex items-start">${cardColorButtons(i)}<div class="flex-1 min-w-0"><div class="flex justify-between gap-2 mb-3"><label><input class=int-check type=checkbox value="${i.id}" onchange="syncInterviewSelectAll()"> <b>${C(i, II.name) || 'CANDIDATE'}</b></label><div>${canEdit ? `<button onclick="openInt('${i.id}')" class=text-indigo-500><i class="fa-solid fa-pen"></i></button> <button onclick="del('int','${i.id}')" class=text-red-500><i class="fa-solid fa-trash-can"></i></button>` : `<i class="fa-solid fa-lock text-slate-300" title="Read Only"></i>`}</div></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">${INT_COLS.map((c, x) => `<div><span class="text-slate-400 font-bold">${c}: </span><span>${C(i, x)}</span></div>`).join('')}</div></div></div></div>`).join('') : '<p class="p-8 text-center text-slate-400">NO INTERVIEWS MATCH FILTERS</p>'
         }
 
         function openInt(id) {
@@ -1399,7 +1491,7 @@ document.addEventListener('DOMContentLoaded', initializeAuthentication);
         }
 
         function renderTrash() {
-            document.getElementById('trash-list').innerHTML = trash.length ? trash.map(t => `<div class="flex justify-between p-3 bg-slate-50 dark:bg-slate-700 rounded-2xl border dark:border-slate-600 mb-2"><div><b>${t.kind.toUpperCase()} - ${tname(t)}</b><div class="text-[10px] text-slate-400">${t.deletedAt}</div></div><div><button onclick="restoreTrash('${t.trashId}')" class="btn bg-emerald-100 text-emerald-700">Restore</button> <button onclick="hardDelete('${t.trashId}')" class="btn btn-r">Delete</button></div></div>`).join('') : '<p class="text-center text-slate-400 py-8">RECYCLE BIN IS EMPTY.</p>'
+            document.getElementById('trash-list').innerHTML = trash.length ? trash.map(t => `<div class="flex justify-between p-3 bg-slate-50 dark:bg-slate-700 rounded-2xl border dark:border-slate-600 mb-2"><div><b>${t.kind.toUpperCase()} - ${tname(t)}</b><div class="text-[10px] text-slate-400">${t.deletedAt}</div></div><div><button onclick="restoreTrash('${t.trashId}')" class="btn bg-emerald-100 text-emerald-700 act-btn">Restore</button> <button onclick="hardDelete('${t.trashId}')" class="btn btn-r act-btn">Delete</button></div></div>`).join('') : '<p class="text-center text-slate-400 py-8">RECYCLE BIN IS EMPTY.</p>'
         }
 
         function restoreTrash(id) {
