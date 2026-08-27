@@ -216,8 +216,7 @@
 
             <hr class="dark:border-slate-700">
             <div class="rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 p-3"><div class="text-[10px] uppercase tracking-widest text-slate-400 font-black">Signed in as</div><div id="auth-user-name" class="mt-1 font-black text-indigo-700 dark:text-indigo-200">Administrator</div></div>
-            <div onclick="openPasswordModal()" class="cursor-pointer"><i class="fa-solid fa-key text-amber-500 mr-2"></i>Change Administrator Password</div>
-            <div onclick="logoutAdmin()" class="cursor-pointer text-red-600 dark:text-red-300"><i class="fa-solid fa-right-from-bracket mr-2"></i>Sign Out</div>
+            <div onclick="openPasswordModal()" class="cursor-pointer"><i class="fa-solid fa-key text-amber-500 mr-2"></i>Change Administrator Password</div><div onclick="createNewAccount()" class="cursor-pointer font-bold text-indigo-600 dark:text-indigo-300"><i class="fa-solid fa-user-plus mr-2"></i>Create New Account (Level 3 Only)</div>
             <label><input type="checkbox" id="dark" onchange="darkMode()"> Dark Mode</label>
         </div>
     </aside>
@@ -565,23 +564,74 @@ document.addEventListener('DOMContentLoaded', initializeAuthentication);
         
 
         // ===== Server-authenticated administrator login =====
-        let authenticatedUser = null, applicationBooted = false;
-        function setLoginMessage(m,ok=false){let e=document.getElementById('login-message');if(e){e.textContent=m||'';e.className='auth-message text-sm font-bold '+(ok?'text-emerald-300':'text-rose-300')}}
-        function setLoginBusy(b){let e=document.getElementById('login-button');if(!e)return;e.disabled=b;e.classList.toggle('opacity-60',b);e.innerHTML=b?'<i class="fa-solid fa-circle-notch auth-spinner mr-2"></i>Signing In...':'<i class="fa-solid fa-right-to-bracket mr-2"></i>Sign In'}
-        function togglePassword(id,b){let e=document.getElementById(id);if(!e)return;e.type=e.type==='password'?'text':'password';let i=b.querySelector('i');if(i)i.className=e.type==='password'?'fa-solid fa-eye':'fa-solid fa-eye-slash'}
-        function showLoginScreen(m=''){document.getElementById('login-screen').classList.remove('authenticated');document.body.style.overflow='hidden';setLoginMessage(m);setTimeout(()=>document.getElementById('login-username')?.focus(),80)}
-        function hideLoginScreen(){document.getElementById('login-screen').classList.add('authenticated');document.body.style.overflow=''}
-        function updateAuthenticatedUser(u){authenticatedUser=u||null;let e=document.getElementById('auth-user-name');if(e)e.textContent=authenticatedUser?.username||'Administrator'}
-        async function authFetch(url,opt={}){let r=await fetch(url,{...opt,credentials:'same-origin',headers:{...(opt.body?{'Content-Type':'application/json'}:{}),...(opt.headers||{})}});if(r.status===401){updateAuthenticatedUser(null);showLoginScreen('Your session has expired. Please sign in again.');throw new Error('Authentication required')}return r}
-        async function checkSession(){try{let r=await fetch('/api/auth/session',{credentials:'same-origin',cache:'no-store'});if(!r.ok)return false;let j=await r.json();if(!j.authenticated)return false;updateAuthenticatedUser(j.user);return true}catch(e){console.error('Session check failed:',e);return false}}
-        async function startAuthenticatedApplication(){hideLoginScreen();if(!applicationBooted){applicationBooted=true;await boot()}else{await load();applyTheme();renderAll()}}
-        async function initializeAuthentication(){document.getElementById('login-form').addEventListener('submit',loginAdmin);document.getElementById('password-form').addEventListener('submit',changeAdminPassword);if(await checkSession())await startAuthenticatedApplication();else showLoginScreen()}
-        async function loginAdmin(ev){ev.preventDefault();setLoginBusy(true);setLoginMessage('');try{let r=await fetch('/api/auth/login',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:document.getElementById('login-username').value.trim(),password:document.getElementById('login-password').value})});let j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.message||'Login failed');updateAuthenticatedUser(j.user);document.getElementById('login-password').value='';setLoginMessage('Login successful.',true);await startAuthenticatedApplication()}catch(e){setLoginMessage(e.message||'Login failed')}finally{setLoginBusy(false)}}
-        async function logoutAdmin(){try{await fetch('/api/auth/logout',{method:'POST',credentials:'same-origin'})}catch(e){console.warn(e)}updateAuthenticatedUser(null);closePasswordModal();document.getElementById('login-form').reset();showLoginScreen('Signed out successfully.')}
-        function openPasswordModal(){let m=document.getElementById('password-modal');document.getElementById('password-form').reset();document.getElementById('password-message').textContent='';m.classList.remove('hidden');m.classList.add('flex')}
-        function closePasswordModal(){let m=document.getElementById('password-modal');m.classList.add('hidden');m.classList.remove('flex')}
-        async function changeAdminPassword(ev){ev.preventDefault();let m=document.getElementById('password-message'),b=document.getElementById('password-submit');m.textContent='';b.disabled=true;try{let r=await authFetch('/api/auth/change-password',{method:'PUT',body:JSON.stringify({currentPassword:document.getElementById('current-password').value,newPassword:document.getElementById('new-password').value,confirmPassword:document.getElementById('confirm-password').value})});let j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.message||'Password change failed');m.className='auth-message text-sm font-bold text-emerald-600';m.textContent=j.message||'Password changed successfully';document.getElementById('password-form').reset();setTimeout(closePasswordModal,1200)}catch(e){m.className='auth-message text-sm font-bold text-rose-600';m.textContent=e.message||'Password change failed'}finally{b.disabled=false}}
-        // ===== End server-authenticated administrator login =====
+      async function startAuthenticatedApplication(){
+            hideLoginScreen();
+            if(!applicationBooted){
+                applicationBooted=true;
+                await boot();
+            } else {
+                await load();
+                applyTheme();
+                renderAll();
+            }
+            applyPermissions(); // Apply UI locks based on Level
+        }
+
+        function applyPermissions() {
+            if (!authenticatedUser) return;
+            const lvl = authenticatedUser.level;
+            
+            // LEVEL 1: Hide Dashboard & Employee Tabs
+            if (lvl === 1) {
+                document.getElementById('nav-dashboard').style.display = 'none';
+                document.getElementById('nav-employees').style.display = 'none';
+                page('interviews'); // Force redirect to interviews page
+            } else {
+                document.getElementById('nav-dashboard').style.display = '';
+                document.getElementById('nav-employees').style.display = '';
+            }
+
+            // LEVEL 1 & 2: Hide all editing/saving capabilities
+            if (lvl < 3) {
+                // Find all action buttons (Add, Edit, Delete, Import, Save)
+                const actionButtons = document.querySelectorAll(`
+                    button[onclick*="openEmp"], button[onclick*="del("], 
+                    button[onclick*="openInt"], button[onclick*="bulkDelete"], 
+                    label:has(input[type="file"]), button:has(.fa-floppy-disk), 
+                    button[onclick*="emptyTrash"], button[onclick*="bulkStatus"]
+                `);
+                
+                actionButtons.forEach(btn => {
+                    // Use !important to override tailwind classes
+                    btn.style.setProperty('display', 'none', 'important');
+                });
+            }
+        }
+
+        // Feature for Super Admin to create new accounts from the UI
+        async function createNewAccount() {
+            if (!authenticatedUser || authenticatedUser.level !== 3) {
+                return alert('Only Super Admins (Level 3) can create accounts.');
+            }
+            let user = prompt('Enter NEW Username:');
+            if (!user) return;
+            let pass = prompt('Enter NEW Password:');
+            if (!pass) return;
+            let lvl = prompt('Enter Access Level:\n1 = Read Interviews Only\n2 = Read All Pages\n3 = Super Admin (Full Edit)');
+            if (!lvl || ![1,2,3].includes(Number(lvl))) return alert('Invalid level entered. Setup cancelled.');
+
+            try {
+                let res = await authFetch('/api/auth/create-user', {
+                    method: 'POST',
+                    body: JSON.stringify({ username: user, password: pass, level: Number(lvl) })
+                });
+                let data = await res.json();
+                alert(data.message);
+            } catch(e) {
+                alert('Error: ' + e.message);
+            }
+        }
+ // ===== End server-authenticated administrator login =====
 
         document.addEventListener('keydown', e => {
             if (e.key === 'PageDown') { e.preventDefault(); nextPage(1) }
